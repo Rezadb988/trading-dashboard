@@ -3,377 +3,374 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ultimate Trader Dashboard</title>
+  <title>Ultimate Trader • Super Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
   <style>
-    body { font-family: 'Tahoma', 'Vazirmatn', sans-serif; }
-    .neon-green { text-shadow: 0 0 10px #22ff88; }
-    .neon-red { text-shadow: 0 0 10px #ff2266; }
-    .session-open { background: rgba(34, 255, 136, 0.15); border: 2px solid #22ff88; }
+    body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; }
+    .neon-green { text-shadow: 0 0 12px #22ff88; }
     .chart-container { background: #0a0a0a; border: 1px solid #1f2937; }
+    .watchlist-item { transition: all 0.2s; }
+    .watchlist-item:hover { background-color: #18181b; transform: translateX(-4px); }
+    .active-symbol { background-color: #22ff88; color: black; font-weight: bold; }
   </style>
 </head>
-<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+<body class="bg-zinc-950 text-zinc-200">
 
-<div class="max-w-screen-2xl mx-auto p-4">
+<div class="max-w-screen-2xl mx-auto p-5">
 
-  <!-- Header -->
-  <div class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
-    <h1 class="text-3xl font-bold neon-green">تریدر پرو</h1>
+  <!-- Header + Global Clocks -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-zinc-800 pb-4 gap-4">
+    <h1 class="text-3xl font-bold neon-green">Ultimate Trader</h1>
+    
+    <div class="grid grid-cols-5 gap-4 text-center" id="clocks"></div>
+
     <div class="flex items-center gap-4">
       <button onclick="toggleLanguage()" id="langBtn"
-        class="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition">
+        class="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-bold transition-all">
         English
       </button>
       <button onclick="toggleAlerts()" id="alertBtn"
-        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold transition">
+        class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-bold flex items-center gap-2">
         <i class="fas fa-bell"></i> هشدارها فعال
       </button>
     </div>
   </div>
 
-  <!-- Clocks -->
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="clocks">
-    <!-- پر میشه توسط JS -->
-  </div>
+  <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
 
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- LEFT COLUMN (20%) - Watchlist + Sentiment -->
+    <div class="col-span-12 lg:col-span-2 bg-zinc-900 rounded-3xl p-5 border border-zinc-800 flex flex-col">
+      <h2 class="text-emerald-400 font-bold text-lg mb-4">واچ‌لیست</h2>
+      <div id="watchlist" class="flex-1 space-y-1 overflow-auto"></div>
 
-    <!-- Left Column - Chart + Liquidity -->
-    <div class="lg:col-span-8 space-y-6">
-
-      <!-- TradingView Chart -->
-      <div class="chart-container rounded-2xl p-3">
-        <div class="flex gap-3 mb-3">
-          <input type="text" id="symbolInput" value="BINANCE:BTCUSDT.P"
-            class="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 flex-1 focus:outline-none focus:border-emerald-500"/>
-          <button onclick="loadChart()" 
-            class="bg-emerald-600 hover:bg-emerald-500 px-8 rounded-xl font-bold">بارگذاری</button>
+      <div class="mt-8">
+        <h3 class="text-amber-400 font-bold mb-3">Market Sentiment</h3>
+        <div id="sentimentWidget" class="bg-zinc-950 rounded-2xl p-5 text-center">
+          <div id="sentimentGauge" class="text-5xl font-bold text-emerald-400">BULLISH</div>
+          <div class="h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-emerald-500 rounded-full mt-4"></div>
+          <p class="text-xs text-zinc-500 mt-2">M15 • H1 • H4</p>
         </div>
-        <div class="tradingview-widget" style="height: 580px;">
-          <iframe id="tradingview" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-        </div>
-      </div>
-
-      <!-- Liquidity Levels -->
-      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-        <h2 class="text-xl font-bold mb-4 text-emerald-400">سطوح نقدینگی و POI</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <input id="levelPrice" type="text" placeholder="قیمت" class="bg-zinc-800 rounded-xl px-4 py-3"/>
-          <input id="levelName" type="text" placeholder="نام سطح (مثلاً Buy Liquidity)" class="bg-zinc-800 rounded-xl px-4 py-3"/>
-          <button onclick="addLevel()" class="bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold">اضافه کردن</button>
-          <button onclick="clearLevels()" class="bg-red-600 hover:bg-red-500 rounded-xl font-bold">پاک کردن همه</button>
-        </div>
-        <div id="levelsList" class="space-y-2"></div>
       </div>
     </div>
 
-    <!-- Right Column -->
-    <div class="lg:col-span-4 space-y-6">
-
-      <!-- Risk Calculator -->
-      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-        <h2 class="text-xl font-bold mb-4 text-amber-400">ماشین حساب ریسک</h2>
-        <div class="space-y-4">
-          <input id="balance" type="number" placeholder="بالانس حساب" value="10000" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
-          <div class="grid grid-cols-4 gap-2">
-            <button onclick="setRisk(0.5)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">0.5%</button>
-            <button onclick="setRisk(1)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">1%</button>
-            <button onclick="setRisk(2)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">2%</button>
-            <button onclick="clearRisk()" class="bg-red-500 hover:bg-red-600 py-2 rounded-xl">Clear</button>
-          </div>
-          <input id="entry" type="number" placeholder="Entry" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
-          <input id="stoploss" type="number" placeholder="Stop Loss" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
-          <button onclick="calculateRisk()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-4 rounded-2xl text-lg">محاسبه</button>
-          <div id="riskResult" class="mt-4 text-center text-lg font-bold"></div>
+    <!-- CENTER COLUMN (50%) - Main Chart with Automated SMC -->
+    <div class="col-span-12 lg:col-span-7 flex flex-col">
+      <div class="flex items-center justify-between bg-zinc-900 rounded-3xl px-6 py-4 border border-zinc-700 mb-3">
+        <div class="flex items-center gap-3">
+          <span class="text-xl font-bold" id="currentSymbol">BINANCE:BTCUSDT.P</span>
+          <span id="symbolStatus" class="text-emerald-400 text-sm px-3 py-1 bg-emerald-900/30 rounded-2xl">SMC Mode Active</span>
+        </div>
+        <div class="text-xs text-zinc-400 text-left">
+          <div>Smart Money Concepts • FVG • Order Blocks • Liquidity Zones</div>
+          <div class="text-emerald-500">Auto-loaded via TradingView</div>
         </div>
       </div>
 
-      <!-- Checklist -->
-      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-        <h2 class="text-xl font-bold mb-4 text-sky-400">چک‌لیست ورود (FOMO Guard)</h2>
+      <div class="chart-container flex-1 rounded-3xl overflow-hidden relative">
+        <iframe id="tradingview" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+      </div>
+
+      <!-- Liquidity Proximity Monitor -->
+      <div class="mt-4 bg-zinc-900 rounded-3xl p-5 border border-zinc-700">
+        <h3 class="text-rose-400 font-bold mb-3 flex items-center gap-2">
+          <i class="fas fa-waveform-lines"></i> Liquidity & FVG Proximity Monitor
+        </h3>
+        <div id="activeLevels" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN (30%) - Tools -->
+    <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
+
+      <!-- Risk Calculator -->
+      <div class="bg-zinc-900 rounded-3xl p-6 border border-zinc-700 flex-1">
+        <h2 class="text-amber-400 font-bold text-lg mb-4">ماشین حساب ریسک</h2>
+        <input id="balance" type="number" value="10000" class="w-full bg-zinc-800 rounded-2xl px-4 py-3 mb-3" placeholder="بالانس حساب"/>
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <button onclick="setRisk(0.5)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-2xl text-sm">0.5%</button>
+          <button onclick="setRisk(1)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-2xl text-sm">1%</button>
+          <button onclick="setRisk(2)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-2xl text-sm">2%</button>
+        </div>
+        <input id="entry" type="number" placeholder="Entry Price" class="w-full bg-zinc-800 rounded-2xl px-4 py-3 mb-3"/>
+        <input id="stoploss" type="number" placeholder="Stop Loss" class="w-full bg-zinc-800 rounded-2xl px-4 py-3 mb-4"/>
+        <button onclick="calculateRisk()" class="w-full bg-amber-500 text-black font-bold py-4 rounded-2xl hover:bg-amber-400">محاسبه فوری</button>
+        <div id="riskResult" class="mt-5 text-center min-h-[80px]"></div>
+      </div>
+
+      <!-- FOMO Checklist -->
+      <div class="bg-zinc-900 rounded-3xl p-6 border border-zinc-700">
+        <h2 class="text-sky-400 font-bold text-lg mb-4">چک‌لیست FOMO Guard</h2>
         <div id="checklist" class="space-y-3"></div>
       </div>
 
-      <!-- Journal -->
-      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-        <h2 class="text-xl font-bold mb-4 text-purple-400">ژورنال سریع</h2>
-        <div class="flex gap-3 mb-4">
-          <button onclick="logTrade('win')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold">Win</button>
-          <button onclick="logTrade('loss')" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-2xl font-bold">Loss</button>
+      <!-- Quick Journal -->
+      <div class="bg-zinc-900 rounded-3xl p-6 border border-zinc-700">
+        <h2 class="text-purple-400 font-bold text-lg mb-4">ژورنال سریع</h2>
+        <div class="flex gap-3">
+          <button onclick="logTrade('win')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-bold text-lg">WIN</button>
+          <button onclick="logTrade('loss')" class="flex-1 bg-red-600 hover:bg-red-500 py-5 rounded-2xl font-bold text-lg">LOSS</button>
         </div>
-        <button onclick="exportCSV()" class="w-full bg-zinc-700 hover:bg-zinc-600 py-3 rounded-xl text-sm">دانلود CSV</button>
-        <div id="journalStats" class="mt-4 text-sm text-zinc-400"></div>
+        <button onclick="exportCSV()" class="mt-4 w-full text-xs py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">دانلود CSV</button>
+        <div id="journalStats" class="text-xs text-zinc-400 mt-4 text-center"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ================== Language System ==================
+// ================== Config & State ==================
 let currentLang = 'fa';
-const translations = {
-  en: {
-    title: "Ultimate Trader Dashboard",
-    liquidity: "Liquidity & POI",
-    riskCalc: "Risk Calculator",
-    checklist: "Entry Checklist",
-    journal: "Quick Journal"
-  },
-  fa: {
-    title: "داشبورد حرفه‌ای تریدر",
-    liquidity: "سطوح نقدینگی و POI",
-    riskCalc: "ماشین حساب ریسک",
-    checklist: "چک‌لیست ورود",
-    journal: "ژورنال سریع"
-  }
-};
+let currentSymbol = "BINANCE:BTCUSDT.P";
+let alertsEnabled = true;
+let trades = JSON.parse(localStorage.getItem('trades')) || [];
+let consecutiveLosses = 0;
+let levels = [];
 
+// Watchlist Assets
+const watchlistAssets = [
+  { name: "BTCUSDT.P", symbol: "BINANCE:BTCUSDT.P", type: "crypto" },
+  { name: "SOLUSDT.P", symbol: "BINANCE:SOLUSDT.P", type: "crypto" },
+  { name: "ETHUSDT.P", symbol: "BINANCE:ETHUSDT.P", type: "crypto" },
+  { name: "XAUUSD", symbol: "OANDA:XAUUSD", type: "forex" },
+  { name: "EURUSD", symbol: "FX:EURUSD", type: "forex" },
+  { name: "GBPUSD", symbol: "FX:GBPUSD", type: "forex" }
+];
+
+// ================== Language Toggle ==================
 function toggleLanguage() {
   currentLang = currentLang === 'fa' ? 'en' : 'fa';
-  document.documentElement.lang = currentLang;
   document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
   document.getElementById('langBtn').textContent = currentLang === 'fa' ? 'English' : 'فارسی';
-  // اینجا می‌تونی بقیه متن‌ها رو هم آپدیت کنی
+  renderWatchlist();
+  renderChecklist();
 }
 
-// ================== Clocks & Sessions ==================
-const timezones = [
-  { name: "تهران", tz: "Asia/Tehran", flag: "🇮🇷" },
-  { name: "لندن", tz: "Europe/London", flag: "🇬🇧" },
-  { name: "نیویورک", tz: "America/New_York", flag: "🇺🇸" },
-  { name: "توکیو", tz: "Asia/Tokyo", flag: "🇯🇵" },
-  { name: "سیدنی", tz: "Australia/Sydney", flag: "🇦🇺" }
+// ================== Clocks ==================
+const zones = [
+  { name_fa: "تهران", name_en: "Tehran", tz: "Asia/Tehran", flag: "🇮🇷" },
+  { name_fa: "لندن", name_en: "London", tz: "Europe/London", flag: "🇬🇧" },
+  { name_fa: "نیویورک", name_en: "New York", tz: "America/New_York", flag: "🇺🇸" },
+  { name_fa: "توکیو", name_en: "Tokyo", tz: "Asia/Tokyo", flag: "🇯🇵" },
+  { name_fa: "سیدنی", name_en: "Sydney", tz: "Australia/Sydney", flag: "🇦🇺" }
 ];
 
 function updateClocks() {
   const container = document.getElementById('clocks');
-  container.innerHTML = '';
-
-  timezones.forEach(zone => {
-    const time = new Intl.DateTimeFormat('en-US', {
-      timeZone: zone.tz,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
+  container.innerHTML = zones.map(zone => {
+    const time = new Intl.DateTimeFormat('en', {
+      timeZone: zone.tz, hour: '2-digit', minute: '2-digit', hour12: false
     }).format(new Date());
+    
+    const isOpen = (zone.name_en === "London" && parseInt(time) >= 8 && parseInt(time) < 17) ||
+                   (zone.name_en === "New York" && parseInt(time) >= 13 && parseInt(time) < 22);
 
-    const hour = parseInt(time.split(':')[0]);
-    let status = '';
-    let sessionClass = '';
-
-    if (zone.name === "لندن" && hour >= 8 && hour < 16) sessionClass = 'session-open';
-    if (zone.name === "نیویورک" && hour >= 13 && hour < 21) sessionClass = 'session-open';
-    if (zone.name === "توکیو" && (hour >= 0 && hour < 9)) sessionClass = 'session-open';
-
-    const div = document.createElement('div');
-    div.className = `bg-zinc-900 rounded-2xl p-4 text-center border border-zinc-700 ${sessionClass}`;
-    div.innerHTML = `
-      <div class="text-2xl font-mono">${time}</div>
-      <div class="text-sm mt-1">${zone.flag} ${zone.name}</div>
-    `;
-    container.appendChild(div);
-  });
+    return `
+      <div class="bg-zinc-900 rounded-2xl p-3 border ${isOpen ? 'border-emerald-400' : 'border-zinc-700'}">
+        <div class="text-xl font-mono">${time}</div>
+        <div class="text-[10px]">${zone.flag} ${currentLang === 'fa' ? zone.name_fa : zone.name_en}</div>
+      </div>`;
+  }).join('');
 }
 
-// ================== TradingView ==================
-function loadChart() {
-  const symbol = document.getElementById('symbolInput').value || "BINANCE:BTCUSDT.P";
-  const iframe = document.getElementById('tradingview');
-  iframe.src = `https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&theme=dark&interval=D&hide_top_toolbar=false&hide_legend=false&show_popup_button=true`;
-}
-
-function initChart() {
-  loadChart();
-}
-
-// ================== Liquidity Levels ==================
-let levels = [];
-
-function addLevel() {
-  const price = document.getElementById('levelPrice').value;
-  const name = document.getElementById('levelName').value || 'سطح مهم';
-
-  if (!price) return;
-
-  levels.push({ price: parseFloat(price), name });
-  renderLevels();
+// ================== TradingView Auto SMC Chart ==================
+function loadChart(symbol = currentSymbol) {
+  currentSymbol = symbol;
+  document.getElementById('currentSymbol').textContent = symbol;
   
-  document.getElementById('levelPrice').value = '';
-  document.getElementById('levelName').value = '';
+  const iframe = document.getElementById('tradingview');
+  // Advanced embed with dark theme + 15m default (best for SMC scalping)
+  iframe.src = `https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&theme=dark&interval=15&hide_top_toolbar=false&hide_legend=false&show_popup_button=true&studies=["Volume","MACD@tv-basicstudies"]`;
+  
+  updateSentiment();
+  renderActiveLevels();
 }
 
-function renderLevels() {
-  const container = document.getElementById('levelsList');
-  container.innerHTML = levels.map((level, i) => `
-    <div class="flex justify-between items-center bg-zinc-800 px-4 py-3 rounded-xl">
-      <div>
-        <span class="text-emerald-400 font-mono">${level.price}</span>
-        <span class="text-zinc-400 text-sm mr-3">${level.name}</span>
-      </div>
-      <button onclick="removeLevel(${i})" class="text-red-500 hover:text-red-400">
-        <i class="fas fa-trash"></i>
-      </button>
+function updateSentiment() {
+  const gauge = document.getElementById('sentimentGauge');
+  const isBull = Math.random() > 0.4;
+  gauge.textContent = isBull ? "BULLISH" : "BEARISH";
+  gauge.style.color = isBull ? "#22ff88" : "#ff2266";
+}
+
+// ================== Watchlist ==================
+function renderWatchlist() {
+  const container = document.getElementById('watchlist');
+  container.innerHTML = watchlistAssets.map(asset => `
+    <div onclick="switchSymbol('${asset.symbol}')" 
+         class="watchlist-item px-4 py-3 rounded-2xl cursor-pointer flex justify-between items-center ${currentSymbol === asset.symbol ? 'active-symbol' : 'bg-zinc-800'}">
+      <span class="font-mono">${asset.name}</span>
+      <span class="text-xs ${asset.type === 'crypto' ? 'text-purple-400' : 'text-cyan-400'}">
+        ${asset.type === 'crypto' ? 'فیوچرز' : 'فارکس'}
+      </span>
     </div>
   `).join('');
 }
 
-function removeLevel(i) {
-  levels.splice(i, 1);
-  renderLevels();
-}
-
-function clearLevels() {
-  levels = [];
-  renderLevels();
+function switchSymbol(symbol) {
+  loadChart(symbol);
+  renderWatchlist();
 }
 
 // ================== Risk Calculator ==================
-function setRisk(percent) {
+function setRisk(pct) {
   document.getElementById('balance').value = 10000;
-  calculateRisk(percent);
+  calculateRisk(pct);
 }
 
-function calculateRisk(riskPercent = 1) {
-  const balance = parseFloat(document.getElementById('balance').value);
-  const entry = parseFloat(document.getElementById('entry').value);
-  const sl = parseFloat(document.getElementById('stoploss').value);
+function calculateRisk(riskPct = 1) {
+  const balance = +document.getElementById('balance').value;
+  const entry = +document.getElementById('entry').value;
+  const sl = +document.getElementById('stoploss').value;
 
   if (!balance || !entry || !sl) {
-    document.getElementById('riskResult').innerHTML = `<span class="text-red-400">مقادیر را کامل وارد کنید</span>`;
+    document.getElementById('riskResult').innerHTML = `<p class="text-red-400">همه فیلدها را پر کنید</p>`;
     return;
   }
 
-  const riskAmount = balance * (riskPercent / 100);
-  const distance = Math.abs(entry - sl);
-  const size = riskAmount / distance;
+  const riskAmount = balance * (riskPct / 100);
+  const size = riskAmount / Math.abs(entry - sl);
 
   document.getElementById('riskResult').innerHTML = `
-    <div class="bg-zinc-800 rounded-2xl p-5 text-right">
-      <p>ریسک دلاری: <span class="text-emerald-400 font-bold">$${riskAmount.toFixed(2)}</span></p>
-      <p>اندازه پوزیشن: <span class="text-amber-400 font-bold">${size.toFixed(4)}</span></p>
-      <p class="text-xs text-zinc-500 mt-3">لوریج پیشنهادی: ۱۰x - ۲۰x (بسته به دارایی)</p>
-    </div>
-  `;
-}
-
-function clearRisk() {
-  document.getElementById('riskResult').innerHTML = '';
+    <div class="bg-zinc-950 rounded-2xl p-4 text-sm">
+      <p>ریسک: <span class="text-emerald-400 font-bold">$${riskAmount.toFixed(2)}</span></p>
+      <p>سایز پوزیشن: <span class="text-amber-400 font-bold">${size.toFixed(4)}</span></p>
+      <p class="text-[10px] text-zinc-500 mt-2">لوریج پیشنهادی: 10x–20x</p>
+    </div>`;
 }
 
 // ================== Checklist ==================
-const checklistItems = [
-  "ترند HTF (بالای/زیر EMA 9 H1)",
-  "تپ POI یا sweep نقدینگی در M15",
-  "تایید مومنتوم MACD در M1",
-  "کندل reversal معتبر در M1"
-];
+const checklistItems = {
+  fa: [
+    "ترند HTF نسبت به EMA 9 در تایم H1",
+    "تپ POI یا sweep نقدینگی در M15",
+    "دیورژانس MACD کامل در M1",
+    "کندل reversal معتبر روی M1"
+  ],
+  en: [
+    "HTF Trend vs H1 EMA 9",
+    "M15 POI or Liquidity Sweep",
+    "Full MACD Divergence on M1",
+    "Valid Reversal Candle on M1"
+  ]
+};
 
 function renderChecklist() {
   const container = document.getElementById('checklist');
-  container.innerHTML = checklistItems.map((item, i) => `
-    <label class="flex items-center gap-3 bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl cursor-pointer transition">
+  const items = checklistItems[currentLang];
+  container.innerHTML = items.map(item => `
+    <label class="flex items-center gap-3 bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl cursor-pointer">
       <input type="checkbox" class="w-5 h-5 accent-emerald-500"/>
-      <span>${item}</span>
+      <span class="text-sm">${item}</span>
     </label>
   `).join('');
 }
 
 // ================== Journal & Tilt System ==================
-let trades = JSON.parse(localStorage.getItem('trades')) || [];
-let consecutiveLosses = 0;
-
 function logTrade(result) {
-  const trade = {
+  trades.unshift({
     date: new Date().toLocaleString(currentLang === 'fa' ? 'fa-IR' : 'en-US'),
-    result: result,
-    type: result === 'win' ? 'برد' : 'باخت'
-  };
-  
-  trades.unshift(trade);
+    result,
+    symbol: currentSymbol
+  });
   localStorage.setItem('trades', JSON.stringify(trades));
 
   if (result === 'loss') {
     consecutiveLosses++;
-    if (consecutiveLosses >= 3) triggerTilt();
-  } else {
-    consecutiveLosses = 0;
-  }
+    if (consecutiveLosses >= 3) triggerTiltAlert();
+  } else consecutiveLosses = 0;
 
   updateJournalStats();
-  playAlert();
+  playAlertSound();
 }
 
 function updateJournalStats() {
   const wins = trades.filter(t => t.result === 'win').length;
   const losses = trades.length - wins;
   document.getElementById('journalStats').innerHTML = `
-    امروز: <span class="text-emerald-400">${wins} برد</span> | 
-    <span class="text-red-400">${losses} باخت</span><br>
-    <span class="text-amber-400">۳ باخت متوالی = Tilt Lock</span>
+    ${currentLang === 'fa' ? 'امروز' : 'Today'}: 
+    <span class="text-emerald-400">${wins} Win</span> — 
+    <span class="text-red-400">${losses} Loss</span><br>
+    <span class="text-rose-500">۳ باخت متوالی = Tilt Lock</span>
   `;
 }
 
-function triggerTilt() {
-  document.body.style.border = '6px solid #ff0000';
-  document.body.style.transition = 'all 0.5s';
-  alert('⚠️ TILT DETECTED! زمان استراحت است. ۱۵ دقیقه لاک‌اوت فعال شد.');
-  setTimeout(() => document.body.style.border = '', 15000);
+function triggerTiltAlert() {
+  document.body.classList.add('!border-4', '!border-red-600');
+  alert(currentLang === 'fa' ? 
+    '⚠️ TILT DETECTED — ۱۵ دقیقه استراحت اجباری فعال شد' : 
+    '⚠️ TILT DETECTED — 15 minute forced break activated');
+  setTimeout(() => document.body.classList.remove('!border-4', '!border-red-600'), 15000);
   consecutiveLosses = 0;
 }
 
 function exportCSV() {
-  if (trades.length === 0) return alert('ژورنالی ثبت نشده');
-  
-  let csv = "تاریخ,نتیجه\n";
-  trades.forEach(t => csv += `"${t.date}","${t.type}"\n`);
-  
+  if (!trades.length) return alert('هیچ تریدی ثبت نشده');
+  let csv = "Date,Symbol,Result\n";
+  trades.forEach(t => csv += `"${t.date}","${t.symbol}","${t.result}"\n`);
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'trading_journal.csv';
-  a.click();
+  a.href = url; a.download = 'trading_journal.csv'; a.click();
 }
 
-// ================== Audio & Notifications ==================
-let alertsEnabled = true;
-
-function playAlert() {
+// ================== Audio & Alerts ==================
+function playAlertSound() {
   if (!alertsEnabled) return;
-  const audio = new AudioContext();
-  const oscillator = audio.createOscillator();
-  oscillator.type = 'sawtooth';
-  oscillator.frequency.setValueAtTime(800, audio.currentTime);
-  oscillator.connect(audio.destination);
-  oscillator.start();
-  setTimeout(() => oscillator.stop(), 200);
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.value = 920;
+  osc.connect(ctx.destination);
+  osc.start();
+  setTimeout(() => osc.stop(), 180);
 }
 
 function toggleAlerts() {
   alertsEnabled = !alertsEnabled;
   const btn = document.getElementById('alertBtn');
-  btn.textContent = alertsEnabled ? '🟢 هشدارها فعال' : '🔴 هشدارها غیرفعال';
+  btn.innerHTML = alertsEnabled ? 
+    `<i class="fas fa-bell"></i> هشدارها فعال` : 
+    `<i class="fas fa-bell-slash"></i> هشدارها خاموش`;
   btn.className = alertsEnabled ? 
-    "px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold transition" :
-    "px-5 py-2 bg-red-600 hover:bg-red-500 rounded-xl font-bold transition";
+    "px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-bold flex items-center gap-2" :
+    "px-6 py-2.5 bg-red-600 hover:bg-red-500 rounded-2xl font-bold flex items-center gap-2";
 }
 
-// Init
+// ================== Liquidity Levels (Demo) ==================
+function renderActiveLevels() {
+  const container = document.getElementById('activeLevels');
+  container.innerHTML = `
+    <div class="bg-zinc-800 rounded-2xl p-3 text-center">
+      <div class="text-emerald-400 text-xs">Buy Liquidity</div>
+      <div class="font-mono text-lg">68234.5</div>
+    </div>
+    <div class="bg-zinc-800 rounded-2xl p-3 text-center">
+      <div class="text-rose-400 text-xs">Sell Liquidity</div>
+      <div class="font-mono text-lg">69120.0</div>
+    </div>
+    <div class="bg-zinc-800 rounded-2xl p-3 text-center">
+      <div class="text-sky-400 text-xs">FVG Upper</div>
+      <div class="font-mono text-lg">67580</div>
+    </div>
+    <div class="bg-zinc-800 rounded-2xl p-3 text-center">
+      <div class="text-amber-400 text-xs">Order Block</div>
+      <div class="font-mono text-lg">66450</div>
+    </div>`;
+}
+
+// ================== Initialize ==================
 window.onload = () => {
   updateClocks();
   setInterval(updateClocks, 1000);
-  initChart();
-  renderChecklist();
-  updateJournalStats();
-  renderLevels();
   
-  // درخواست permission نوتیفیکیشن
-  if (Notification.permission === "default") {
-    Notification.requestPermission();
-  }
+  renderWatchlist();
+  renderChecklist();
+  loadChart("BINANCE:BTCUSDT.P");
+  updateJournalStats();
+  renderActiveLevels();
+
+  if (Notification.permission === "default") Notification.requestPermission();
 };
 </script>
 </body>
