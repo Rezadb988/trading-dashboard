@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ultimate Trader Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <style>
+    body { font-family: 'Tahoma', 'Vazirmatn', sans-serif; }
+    .neon-green { text-shadow: 0 0 10px #22ff88; }
+    .neon-red { text-shadow: 0 0 10px #ff2266; }
+    .session-open { background: rgba(34, 255, 136, 0.15); border: 2px solid #22ff88; }
+    .chart-container { background: #0a0a0a; border: 1px solid #1f2937; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+
+<div class="max-w-screen-2xl mx-auto p-4">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+    <h1 class="text-3xl font-bold neon-green">تریدر پرو</h1>
+    <div class="flex items-center gap-4">
+      <button onclick="toggleLanguage()" id="langBtn"
+        class="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition">
+        English
+      </button>
+      <button onclick="toggleAlerts()" id="alertBtn"
+        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold transition">
+        <i class="fas fa-bell"></i> هشدارها فعال
+      </button>
+    </div>
+  </div>
+
+  <!-- Clocks -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="clocks">
+    <!-- پر میشه توسط JS -->
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column - Chart + Liquidity -->
+    <div class="lg:col-span-8 space-y-6">
+
+      <!-- TradingView Chart -->
+      <div class="chart-container rounded-2xl p-3">
+        <div class="flex gap-3 mb-3">
+          <input type="text" id="symbolInput" value="BINANCE:BTCUSDT.P"
+            class="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 flex-1 focus:outline-none focus:border-emerald-500"/>
+          <button onclick="loadChart()" 
+            class="bg-emerald-600 hover:bg-emerald-500 px-8 rounded-xl font-bold">بارگذاری</button>
+        </div>
+        <div class="tradingview-widget" style="height: 580px;">
+          <iframe id="tradingview" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- Liquidity Levels -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+        <h2 class="text-xl font-bold mb-4 text-emerald-400">سطوح نقدینگی و POI</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <input id="levelPrice" type="text" placeholder="قیمت" class="bg-zinc-800 rounded-xl px-4 py-3"/>
+          <input id="levelName" type="text" placeholder="نام سطح (مثلاً Buy Liquidity)" class="bg-zinc-800 rounded-xl px-4 py-3"/>
+          <button onclick="addLevel()" class="bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold">اضافه کردن</button>
+          <button onclick="clearLevels()" class="bg-red-600 hover:bg-red-500 rounded-xl font-bold">پاک کردن همه</button>
+        </div>
+        <div id="levelsList" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="lg:col-span-4 space-y-6">
+
+      <!-- Risk Calculator -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+        <h2 class="text-xl font-bold mb-4 text-amber-400">ماشین حساب ریسک</h2>
+        <div class="space-y-4">
+          <input id="balance" type="number" placeholder="بالانس حساب" value="10000" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
+          <div class="grid grid-cols-4 gap-2">
+            <button onclick="setRisk(0.5)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">0.5%</button>
+            <button onclick="setRisk(1)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">1%</button>
+            <button onclick="setRisk(2)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-xl">2%</button>
+            <button onclick="clearRisk()" class="bg-red-500 hover:bg-red-600 py-2 rounded-xl">Clear</button>
+          </div>
+          <input id="entry" type="number" placeholder="Entry" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
+          <input id="stoploss" type="number" placeholder="Stop Loss" class="w-full bg-zinc-800 rounded-xl px-4 py-3"/>
+          <button onclick="calculateRisk()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-4 rounded-2xl text-lg">محاسبه</button>
+          <div id="riskResult" class="mt-4 text-center text-lg font-bold"></div>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+        <h2 class="text-xl font-bold mb-4 text-sky-400">چک‌لیست ورود (FOMO Guard)</h2>
+        <div id="checklist" class="space-y-3"></div>
+      </div>
+
+      <!-- Journal -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+        <h2 class="text-xl font-bold mb-4 text-purple-400">ژورنال سریع</h2>
+        <div class="flex gap-3 mb-4">
+          <button onclick="logTrade('win')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold">Win</button>
+          <button onclick="logTrade('loss')" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-2xl font-bold">Loss</button>
+        </div>
+        <button onclick="exportCSV()" class="w-full bg-zinc-700 hover:bg-zinc-600 py-3 rounded-xl text-sm">دانلود CSV</button>
+        <div id="journalStats" class="mt-4 text-sm text-zinc-400"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================== Language System ==================
+let currentLang = 'fa';
+const translations = {
+  en: {
+    title: "Ultimate Trader Dashboard",
+    liquidity: "Liquidity & POI",
+    riskCalc: "Risk Calculator",
+    checklist: "Entry Checklist",
+    journal: "Quick Journal"
+  },
+  fa: {
+    title: "داشبورد حرفه‌ای تریدر",
+    liquidity: "سطوح نقدینگی و POI",
+    riskCalc: "ماشین حساب ریسک",
+    checklist: "چک‌لیست ورود",
+    journal: "ژورنال سریع"
+  }
+};
+
+function toggleLanguage() {
+  currentLang = currentLang === 'fa' ? 'en' : 'fa';
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+  document.getElementById('langBtn').textContent = currentLang === 'fa' ? 'English' : 'فارسی';
+  // اینجا می‌تونی بقیه متن‌ها رو هم آپدیت کنی
+}
+
+// ================== Clocks & Sessions ==================
+const timezones = [
+  { name: "تهران", tz: "Asia/Tehran", flag: "🇮🇷" },
+  { name: "لندن", tz: "Europe/London", flag: "🇬🇧" },
+  { name: "نیویورک", tz: "America/New_York", flag: "🇺🇸" },
+  { name: "توکیو", tz: "Asia/Tokyo", flag: "🇯🇵" },
+  { name: "سیدنی", tz: "Australia/Sydney", flag: "🇦🇺" }
+];
+
+function updateClocks() {
+  const container = document.getElementById('clocks');
+  container.innerHTML = '';
+
+  timezones.forEach(zone => {
+    const time = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone.tz,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(new Date());
+
+    const hour = parseInt(time.split(':')[0]);
+    let status = '';
+    let sessionClass = '';
+
+    if (zone.name === "لندن" && hour >= 8 && hour < 16) sessionClass = 'session-open';
+    if (zone.name === "نیویورک" && hour >= 13 && hour < 21) sessionClass = 'session-open';
+    if (zone.name === "توکیو" && (hour >= 0 && hour < 9)) sessionClass = 'session-open';
+
+    const div = document.createElement('div');
+    div.className = `bg-zinc-900 rounded-2xl p-4 text-center border border-zinc-700 ${sessionClass}`;
+    div.innerHTML = `
+      <div class="text-2xl font-mono">${time}</div>
+      <div class="text-sm mt-1">${zone.flag} ${zone.name}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ================== TradingView ==================
+function loadChart() {
+  const symbol = document.getElementById('symbolInput').value || "BINANCE:BTCUSDT.P";
+  const iframe = document.getElementById('tradingview');
+  iframe.src = `https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol)}&theme=dark&interval=D&hide_top_toolbar=false&hide_legend=false&show_popup_button=true`;
+}
+
+function initChart() {
+  loadChart();
+}
+
+// ================== Liquidity Levels ==================
+let levels = [];
+
+function addLevel() {
+  const price = document.getElementById('levelPrice').value;
+  const name = document.getElementById('levelName').value || 'سطح مهم';
+
+  if (!price) return;
+
+  levels.push({ price: parseFloat(price), name });
+  renderLevels();
+  
+  document.getElementById('levelPrice').value = '';
+  document.getElementById('levelName').value = '';
+}
+
+function renderLevels() {
+  const container = document.getElementById('levelsList');
+  container.innerHTML = levels.map((level, i) => `
+    <div class="flex justify-between items-center bg-zinc-800 px-4 py-3 rounded-xl">
+      <div>
+        <span class="text-emerald-400 font-mono">${level.price}</span>
+        <span class="text-zinc-400 text-sm mr-3">${level.name}</span>
+      </div>
+      <button onclick="removeLevel(${i})" class="text-red-500 hover:text-red-400">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function removeLevel(i) {
+  levels.splice(i, 1);
+  renderLevels();
+}
+
+function clearLevels() {
+  levels = [];
+  renderLevels();
+}
+
+// ================== Risk Calculator ==================
+function setRisk(percent) {
+  document.getElementById('balance').value = 10000;
+  calculateRisk(percent);
+}
+
+function calculateRisk(riskPercent = 1) {
+  const balance = parseFloat(document.getElementById('balance').value);
+  const entry = parseFloat(document.getElementById('entry').value);
+  const sl = parseFloat(document.getElementById('stoploss').value);
+
+  if (!balance || !entry || !sl) {
+    document.getElementById('riskResult').innerHTML = `<span class="text-red-400">مقادیر را کامل وارد کنید</span>`;
+    return;
+  }
+
+  const riskAmount = balance * (riskPercent / 100);
+  const distance = Math.abs(entry - sl);
+  const size = riskAmount / distance;
+
+  document.getElementById('riskResult').innerHTML = `
+    <div class="bg-zinc-800 rounded-2xl p-5 text-right">
+      <p>ریسک دلاری: <span class="text-emerald-400 font-bold">$${riskAmount.toFixed(2)}</span></p>
+      <p>اندازه پوزیشن: <span class="text-amber-400 font-bold">${size.toFixed(4)}</span></p>
+      <p class="text-xs text-zinc-500 mt-3">لوریج پیشنهادی: ۱۰x - ۲۰x (بسته به دارایی)</p>
+    </div>
+  `;
+}
+
+function clearRisk() {
+  document.getElementById('riskResult').innerHTML = '';
+}
+
+// ================== Checklist ==================
+const checklistItems = [
+  "ترند HTF (بالای/زیر EMA 9 H1)",
+  "تپ POI یا sweep نقدینگی در M15",
+  "تایید مومنتوم MACD در M1",
+  "کندل reversal معتبر در M1"
+];
+
+function renderChecklist() {
+  const container = document.getElementById('checklist');
+  container.innerHTML = checklistItems.map((item, i) => `
+    <label class="flex items-center gap-3 bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl cursor-pointer transition">
+      <input type="checkbox" class="w-5 h-5 accent-emerald-500"/>
+      <span>${item}</span>
+    </label>
+  `).join('');
+}
+
+// ================== Journal & Tilt System ==================
+let trades = JSON.parse(localStorage.getItem('trades')) || [];
+let consecutiveLosses = 0;
+
+function logTrade(result) {
+  const trade = {
+    date: new Date().toLocaleString(currentLang === 'fa' ? 'fa-IR' : 'en-US'),
+    result: result,
+    type: result === 'win' ? 'برد' : 'باخت'
+  };
+  
+  trades.unshift(trade);
+  localStorage.setItem('trades', JSON.stringify(trades));
+
+  if (result === 'loss') {
+    consecutiveLosses++;
+    if (consecutiveLosses >= 3) triggerTilt();
+  } else {
+    consecutiveLosses = 0;
+  }
+
+  updateJournalStats();
+  playAlert();
+}
+
+function updateJournalStats() {
+  const wins = trades.filter(t => t.result === 'win').length;
+  const losses = trades.length - wins;
+  document.getElementById('journalStats').innerHTML = `
+    امروز: <span class="text-emerald-400">${wins} برد</span> | 
+    <span class="text-red-400">${losses} باخت</span><br>
+    <span class="text-amber-400">۳ باخت متوالی = Tilt Lock</span>
+  `;
+}
+
+function triggerTilt() {
+  document.body.style.border = '6px solid #ff0000';
+  document.body.style.transition = 'all 0.5s';
+  alert('⚠️ TILT DETECTED! زمان استراحت است. ۱۵ دقیقه لاک‌اوت فعال شد.');
+  setTimeout(() => document.body.style.border = '', 15000);
+  consecutiveLosses = 0;
+}
+
+function exportCSV() {
+  if (trades.length === 0) return alert('ژورنالی ثبت نشده');
+  
+  let csv = "تاریخ,نتیجه\n";
+  trades.forEach(t => csv += `"${t.date}","${t.type}"\n`);
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'trading_journal.csv';
+  a.click();
+}
+
+// ================== Audio & Notifications ==================
+let alertsEnabled = true;
+
+function playAlert() {
+  if (!alertsEnabled) return;
+  const audio = new AudioContext();
+  const oscillator = audio.createOscillator();
+  oscillator.type = 'sawtooth';
+  oscillator.frequency.setValueAtTime(800, audio.currentTime);
+  oscillator.connect(audio.destination);
+  oscillator.start();
+  setTimeout(() => oscillator.stop(), 200);
+}
+
+function toggleAlerts() {
+  alertsEnabled = !alertsEnabled;
+  const btn = document.getElementById('alertBtn');
+  btn.textContent = alertsEnabled ? '🟢 هشدارها فعال' : '🔴 هشدارها غیرفعال';
+  btn.className = alertsEnabled ? 
+    "px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold transition" :
+    "px-5 py-2 bg-red-600 hover:bg-red-500 rounded-xl font-bold transition";
+}
+
+// Init
+window.onload = () => {
+  updateClocks();
+  setInterval(updateClocks, 1000);
+  initChart();
+  renderChecklist();
+  updateJournalStats();
+  renderLevels();
+  
+  // درخواست permission نوتیفیکیشن
+  if (Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+};
+</script>
+</body>
+</html>
