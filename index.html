@@ -1,375 +1,1116 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>استراتژی AO + FVG • داشبورد حرفه‌ای</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
-  <style>
-    body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; }
-    .live-dot { animation: pulse 2s infinite; }
-    .neon { text-shadow: 0 0 10px #22ff88; }
-    table { border-collapse: collapse; }
-    tr:hover { background-color: #18181b; }
-    .modal { animation: fadeIn 0.3s; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AO Trader Pro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#03050c;--s1:#070c17;--s2:#0b1121;--s3:#0f172a;--s4:#131f35;
+  --border:#1e2d48;--border2:#263650;
+  --accent:#00e5ff;--accent2:#7c3aed;--accent3:#f59e0b;
+  --green:#00e676;--green2:#69f0ae;--red:#ff1744;--red2:#ff6e6e;
+  --orange:#ff9100;--yellow:#ffd600;--purple:#bb86fc;
+  --text:#e8f0fe;--text2:#8899bb;--text3:#4a607a;
+}
+body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* Header */
+.hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;gap:10px;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.brand h1{font-size:13px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--green);font-weight:700;}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.cd{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;}
+.hctrls{display:flex;gap:6px;align-items:center;}
+.hbtn{padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;}
+.hbtn:hover,.hbtn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06);}
+/* Page nav */
+.pagenav{display:flex;background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;}
+.pnav-btn{padding:10px 16px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.pnav-btn.on{color:var(--accent);border-color:var(--accent);}
+.page{display:none;}
+.page.on{display:block;}
+/* Clocks */
+.clocks-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--border);}
+.clock-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;}
+.clock-card.open{border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.03);}
+.clock-card.overlap{border-color:rgba(245,158,11,.5);animation:ovp 2s infinite;}
+@keyframes ovp{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.3)}50%{box-shadow:0 0 0 4px rgba(245,158,11,.08)}}
+.cc-left .cc-city{font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.cc-right{text-align:right;}
+.cc-time{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;}
+.cc-status{font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;display:inline-block;margin-top:2px;}
+.cs-open{background:rgba(0,230,118,.12);color:var(--green);}
+.cs-closed{background:rgba(255,255,255,.04);color:var(--text3);}
+.cs-overlap{background:rgba(245,158,11,.15);color:var(--orange);}
+/* Alarm panel */
+.alarm-panel{background:var(--s1);border-bottom:1px solid var(--border);padding:9px 14px;}
+.ap-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.ap-ttl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;}
+.tog{display:flex;align-items:center;gap:5px;cursor:pointer;}
+.tog-track{width:34px;height:18px;background:var(--text3);border-radius:9px;position:relative;transition:background .3s;flex-shrink:0;}
+.tog-track.on{background:var(--green);}
+.tog-thumb{width:14px;height:14px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .3s;}
+.tog-track.on .tog-thumb{left:18px;}
+.tog-lbl{font-size:10px;color:var(--text2);}
+.sopt{padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:9px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.sopt.on{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06);}
+.atype{padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:9px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.atype.on{border-color:var(--purple);color:var(--purple);background:rgba(187,134,252,.06);}
+/* Panels */
+.panel{background:var(--s2);border:1px solid var(--border);border-radius:12px;margin:10px 12px;padding:12px 16px;}
+.panel-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.fp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.04em;}
+.fg input,.fg select,.fg textarea{background:var(--s3);border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace;direction:ltr;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+/* Watchlist */
+.wl-input-row{display:flex;gap:8px;margin-bottom:10px;}
+.wl-input{flex:1;background:var(--s3);border:1.5px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-size:12px;font-family:'JetBrains Mono',monospace;direction:ltr;outline:none;}
+.wl-input:focus{border-color:var(--accent);}
+.wl-add{padding:7px 16px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:7px;color:white;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.wl-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.wl-tag{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600;}
+.wl-tag button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+.wl-tag button:hover{color:var(--red);}
+/* Table */
+.table-wrap{background:var(--s2);border:1px solid var(--border);border-radius:12px;margin:10px 12px;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;direction:ltr;min-width:1200px;}
+thead{background:var(--s3);border-bottom:2px solid var(--border);}
+thead th{padding:9px 10px;font-size:8px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody tr.flash{animation:fr 1s ease 2;}
+@keyframes fr{0%,100%{background:transparent}50%{background:rgba(245,158,11,.08)}}
+td{padding:9px 10px;font-size:10px;font-family:'JetBrains Mono',monospace;text-align:left;white-space:nowrap;vertical-align:middle;}
+.td-sym{font-weight:700;color:var(--accent);font-size:11px;text-decoration:underline;}
+.td-price{color:var(--text);font-weight:600;}
+.dir-long{background:rgba(0,230,118,.15);color:var(--green2);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:800;}
+.dir-short{background:rgba(255,23,68,.15);color:var(--red2);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:800;}
+.dir-neutral{background:rgba(255,255,255,.04);color:var(--text3);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;}
+.ao-bull{background:rgba(0,230,118,.12);color:var(--green2);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.ao-bear{background:rgba(255,23,68,.12);color:var(--red2);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.ao-neutral{background:rgba(255,255,255,.04);color:var(--text3);padding:3px 8px;border-radius:5px;font-size:9px;font-weight:700;}
+.fvg-b{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.25);color:var(--green);display:inline-flex;flex-direction:column;padding:2px 6px;border-radius:5px;font-size:8px;font-weight:700;line-height:1.5;margin:1px;}
+.fvg-s{background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.25);color:var(--red);display:inline-flex;flex-direction:column;padding:2px 6px;border-radius:5px;font-size:8px;font-weight:700;line-height:1.5;margin:1px;}
+.near{animation:np 1.2s infinite;}
+@keyframes np{0%,100%{opacity:1}50%{opacity:.4}}
+.liq-b{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;margin:1px;display:inline-flex;align-items:center;gap:2px;}
+.liq-s{background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.2);color:var(--red);padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;margin:1px;display:inline-flex;align-items:center;gap:2px;}
+.div-warn{background:rgba(187,134,252,.1);border:1px solid rgba(187,134,252,.3);color:var(--purple);padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;}
+.dnone{color:var(--text3);font-size:9px;}
+.upd{color:var(--text3);font-size:9px;}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ldc{color:var(--text3);font-family:'Vazirmatn',sans-serif;font-size:10px;}
+.errc{color:var(--red);font-size:9px;font-family:'Vazirmatn',sans-serif;}
+/* Chart Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:96vw;max-width:1050px;height:86vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+.modal-title{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent);}
+.modal-close{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:15px;cursor:pointer;padding:3px 9px;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-tfs{display:flex;gap:5px;}
+.modal-tfs button{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;font-weight:600;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;}
+.modal-tfs button.on{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06);}
+.chart-area{flex:1;position:relative;overflow:hidden;}
+#chartCanvas{display:block;}
+.chart-legend{padding:6px 14px;border-top:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;font-size:9px;flex-shrink:0;}
+.leg{display:flex;align-items:center;gap:4px;color:var(--text3);}
+.leg-dot{width:12px;height:3px;border-radius:1px;}
+/* Calculator */
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.ck{padding:14px;border-radius:8px;border:1px solid var(--border);background:var(--s3);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;text-align:center;}
+.ck:hover{background:var(--s4);}
+.ck.op{color:var(--accent);}
+.ck.eq{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:white;}
+.ck.clear{color:var(--red);}
+.calc-display{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;color:var(--text);font-size:24px;font-family:'JetBrains Mono',monospace;text-align:left;direction:ltr;margin-bottom:10px;outline:none;}
+/* Journal */
+.j-res-win{background:rgba(0,230,118,.1);color:var(--green);padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;}
+.j-res-loss{background:rgba(255,23,68,.1);color:var(--red);padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;}
+.j-res-rf{background:rgba(255,255,255,.05);color:var(--text3);padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;}
+/* Toast */
+.toast-wrap{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;min-width:260px;max-width:90vw;}
+.toast{background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;font-size:11px;animation:tin .3s ease;line-height:1.5;}
+.toast.success{border-color:var(--green);}
+.toast.danger{border-color:var(--red);}
+.toast.warn{border-color:var(--orange);}
+.toast.info{border-color:var(--accent);}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){.clocks-strip{grid-template-columns:1fr 1fr;}}
+</style>
 </head>
-<body class="bg-zinc-950 text-zinc-100">
+<body>
 
-<div class="flex h-screen">
+<div class="hdr">
+  <div class="brand">
+    <div class="brand-icon">📊</div>
+    <h1>AO Trader Pro</h1>
+  </div>
+  <div class="hctrls">
+    <div class="live-pill"><div class="ldot"></div>LIVE</div>
+    <div class="cd" id="cd">⏱ 30s</div>
+    <button class="hbtn" id="notifBtn" onclick="toggleNotif()">🔔</button>
+    <button class="hbtn" id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+</div>
 
-  <!-- Sidebar -->
-  <div class="w-56 bg-black border-l border-zinc-800 p-4 flex flex-col">
-    <h1 class="text-2xl font-bold text-emerald-400 neon mb-8">AO + FVG</h1>
-    <nav class="space-y-2">
-      <button onclick="showPage(1)" class="nav-btn w-full text-right px-4 py-3 rounded-2xl bg-zinc-900 hover:bg-emerald-900/30 flex items-center gap-3 active">
-        <i class="fas fa-chart-line"></i> داشبورد لایو
-      </button>
-      <button onclick="showPage(2)" class="nav-btn w-full text-right px-4 py-3 rounded-2xl hover:bg-emerald-900/30 flex items-center gap-3">
-        <i class="fas fa-calculator"></i> ماشین حساب
-      </button>
-      <button onclick="showPage(3)" class="nav-btn w-full text-right px-4 py-3 rounded-2xl hover:bg-emerald-900/30 flex items-center gap-3">
-        <i class="fas fa-book"></i> ژورنال معاملات
-      </button>
-    </nav>
+<div class="pagenav">
+  <div class="pnav-btn on" onclick="switchPage('scanner',this)">📡 اسکنر</div>
+  <div class="pnav-btn" onclick="switchPage('calc',this)">🧮 ماشین‌حساب</div>
+  <div class="pnav-btn" onclick="switchPage('journal',this)">📓 ژورنال</div>
+</div>
 
-    <div class="mt-auto pt-6 border-t border-zinc-800">
-      <button onclick="toggleLanguage()" id="langBtn" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-bold">English</button>
+<!-- PAGE 1: SCANNER -->
+<div class="page on" id="page-scanner">
+  <div class="clocks-strip">
+    <div class="clock-card" id="ck-tehran"><div class="cc-left"><div class="cc-city" id="cc-tehran">تهران</div></div><div class="cc-right"><div class="cc-time" id="ct-tehran">--:--:--</div><span class="cc-status cs-closed" id="cs-tehran">--</span></div></div>
+    <div class="clock-card" id="ck-london"><div class="cc-left"><div class="cc-city" id="cc-london">لندن</div></div><div class="cc-right"><div class="cc-time" id="ct-london">--:--:--</div><span class="cc-status cs-closed" id="cs-london">--</span></div></div>
+    <div class="clock-card" id="ck-ny"><div class="cc-left"><div class="cc-city" id="cc-ny">نیویورک</div></div><div class="cc-right"><div class="cc-time" id="ct-ny">--:--:--</div><span class="cc-status cs-closed" id="cs-ny">--</span></div></div>
+    <div class="clock-card" id="ck-tokyo"><div class="cc-left"><div class="cc-city" id="cc-tokyo">توکیو</div></div><div class="cc-right"><div class="cc-time" id="ct-tokyo">--:--:--</div><span class="cc-status cs-closed" id="cs-tokyo">--</span></div></div>
+  </div>
+
+  <div class="alarm-panel">
+    <div class="ap-row">
+      <span class="ap-ttl" id="ap-alm">🔔 هشدار:</span>
+      <div class="tog" onclick="toggleAlarms()"><div class="tog-track on" id="tog-alarm"><div class="tog-thumb"></div></div><span class="tog-lbl" id="tog-alarm-lbl">روشن</span></div>
+      <span class="ap-ttl" id="ap-snd">صدا:</span>
+      <button class="sopt on" onclick="setSound('chime',this)">🎵 Chime</button>
+      <button class="sopt" onclick="setSound('ding',this)">🔔 Ding</button>
+      <button class="sopt" onclick="setSound('pop',this)">💫 Pop</button>
+      <button class="sopt" onclick="setSound('soft',this)">🌊 Soft</button>
+      <button class="hbtn" onclick="playAlarm(true)">▶ تست</button>
+      <span class="ap-ttl" id="ap-for">هشدار برای:</span>
+      <button class="atype on" data-t="fvg" onclick="togAT(this)">FVG</button>
+      <button class="atype on" data-t="liq" onclick="togAT(this)">Liquidity</button>
+      <button class="atype on" data-t="div" onclick="togAT(this)">MACD Div</button>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="flex-1 overflow-auto">
-
-    <!-- Top Bar -->
-    <div class="bg-zinc-900 border-b border-zinc-700 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-2">
-          <span class="text-emerald-400 text-xl font-bold live-dot">●</span>
-          <span class="text-emerald-400 font-bold text-lg">LIVE</span>
-        </div>
-        <div class="flex items-center gap-2 text-sm">
-          <span class="text-zinc-400">آپدیت بعدی:</span>
-          <span id="countdown" class="font-mono text-amber-400 font-bold">30s</span>
-        </div>
+  <div class="panel" style="margin:10px 12px;">
+    <div class="panel-title">🧠 <span id="filt-title">فیلترهای محاسباتی هوشمند</span></div>
+    <div class="fp-row">
+      <div class="fg"><label id="lbl-ao-tf">AO تایم‌فریم</label>
+        <select id="cfg-ao-tf" style="width:80px"><option value="1h" selected>1H</option><option value="4h">4H</option><option value="15m">15m</option></select>
       </div>
+      <div class="fg"><label id="lbl-early">هشدار زودهنگام (دقیقه)</label><input type="number" id="cfg-early" value="7" style="width:80px"/></div>
+      <div class="fg"><label id="lbl-div-tf">تایم‌فریم واگرایی MACD</label>
+        <select id="cfg-div-tf" style="width:80px"><option value="1m" selected>1m</option><option value="5m">5m</option><option value="15m">15m</option></select>
+      </div>
+      <div class="fg"><label id="lbl-near">آستانه نزدیکی (%)</label><input type="number" id="cfg-near" value="0.5" step="0.1" style="width:80px"/></div>
+      <button class="hbtn on" onclick="applyAndRefresh()" id="btn-apply">↺ اعمال و اسکن</button>
+    </div>
+  </div>
 
-      <!-- Clocks -->
-      <div class="flex gap-6 text-sm" id="clocks"></div>
+  <div class="panel" style="margin:0 12px 10px;">
+    <div class="panel-title">📋 <span id="wl-title">مدیریت واچ‌لیست</span></div>
+    <div class="wl-input-row">
+      <input class="wl-input" id="wl-inp" placeholder="مثال: SOLUSDT.P یا BTCUSDT.P"/>
+      <button class="wl-add" onclick="addWL()" id="btn-wl-add">+ اضافه</button>
+    </div>
+    <div class="wl-tags" id="wl-tags"></div>
+  </div>
 
-      <!-- Alert Settings -->
-      <div class="flex items-center gap-4">
-        <button onclick="openAlertSettings()" class="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-5 py-2 rounded-2xl">
-          <i class="fas fa-bell"></i> مدیریت آلارم
-        </button>
-        <button onclick="toggleAlerts()" id="alertStatus" class="px-5 py-2 bg-emerald-600 rounded-2xl font-bold">آلارم فعال</button>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>نماد</th><th>قیمت زنده</th>
+        <th id="th-ao">AO (1H)</th>
+        <th>جهت مجاز</th>
+        <th>FVG 5m</th><th>FVG 15m</th><th>FVG 1H</th>
+        <th>Liquidity</th>
+        <th id="th-div">واگرایی MACD (1m)</th>
+        <th>آخرین آپدیت</th>
+      </tr></thead>
+      <tbody id="scanner-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAGE 2: CALCULATOR -->
+<div class="page" id="page-calc">
+  <div style="max-width:900px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px;">
+    <div class="panel" style="margin:0;">
+      <div class="panel-title">🔢 <span id="sc-title">ماشین‌حساب ساده</span></div>
+      <input class="calc-display" id="sc-disp" readonly value="0"/>
+      <div class="calc-grid" id="sc-btns"></div>
+    </div>
+    <div class="panel" style="margin:0;">
+      <div class="panel-title">📈 <span id="ci-title">ماشین‌حساب سود مرکب</span></div>
+      <div class="fp-row" style="margin-bottom:12px;">
+        <div class="fg"><label id="ci-cap-lbl">سرمایه اولیه ($)</label><input type="number" id="ci-cap" value="1000" style="width:120px"/></div>
+        <div class="fg"><label id="ci-pct-lbl">سود هر معامله (%)</label><input type="number" id="ci-pct" value="2" step="0.1" style="width:120px"/></div>
+        <div class="fg"><label id="ci-n-lbl">تعداد معامله</label><input type="number" id="ci-n" value="10" min="1" max="500" style="width:120px"/></div>
+        <button class="hbtn on" onclick="calcCompound()" id="btn-ci">🧮 محاسبه</button>
+      </div>
+      <div id="ci-summary" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--text3);margin-bottom:4px;">سرمایه نهایی</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);" id="ci-final">—</div></div>
+          <div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--text3);margin-bottom:4px;">کل سود</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);" id="ci-profit">—</div></div>
+          <div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--text3);margin-bottom:4px;">رشد کل</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--orange);" id="ci-growth">—</div></div>
+        </div>
+        <div class="table-wrap" style="margin:0;max-height:280px;overflow-y:auto;">
+          <table style="min-width:0;"><thead><tr><th>#</th><th>سرمایه قبل</th><th>سود</th><th>سرمایه بعد</th></tr></thead><tbody id="ci-tbody"></tbody></table>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Page 1: Dashboard -->
-    <div id="page1" class="p-6">
-      <h2 class="text-2xl font-bold mb-6">تحلیل هوشمند استراتژی AO + FVG</h2>
-      
-      <table class="w-full text-sm">
-        <thead class="bg-zinc-900 sticky top-0">
-          <tr class="text-zinc-400 border-b border-zinc-700">
-            <th class="p-4 text-right">نماد</th>
-            <th class="p-4">قیمت زنده</th>
-            <th class="p-4">جهت مجاز (AO 1H)</th>
-            <th class="p-4">FVG 5M (لانگ/شورت)</th>
-            <th class="p-4">FVG 15M</th>
-            <th class="p-4">FVG 1H</th>
-            <th class="p-4">لیکوییدی نزدیک</th>
-            <th class="p-4">واگرایی MACD (1M)</th>
-            <th class="p-4">آخرین آپدیت</th>
-          </tr>
-        </thead>
-        <tbody id="dashboardTable" class="text-zinc-300"></tbody>
+<!-- PAGE 3: JOURNAL -->
+<div class="page" id="page-journal">
+  <div style="max-width:1000px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px;">
+    <div class="panel" style="margin:0;">
+      <div class="panel-title">✏️ <span id="je-title">ثبت معامله جدید</span></div>
+      <div class="fp-row" style="margin-bottom:10px;flex-wrap:wrap;">
+        <div class="fg"><label>جفت ارز</label><input id="je-sym" placeholder="SOLUSDT.P" style="width:130px"/></div>
+        <div class="fg"><label>تاریخ</label><input type="date" id="je-date" style="width:140px"/></div>
+        <div class="fg"><label>ساعت</label><input type="time" id="je-time" style="width:100px"/></div>
+        <div class="fg"><label>جهت</label><select id="je-dir" style="width:90px"><option value="long">LONG 🟢</option><option value="short">SHORT 🔴</option></select></div>
+        <div class="fg"><label>نتیجه</label><select id="je-result" style="width:120px"><option value="win">✅ Win</option><option value="loss">❌ Loss</option><option value="rf">⚪ ریسک‌فری</option></select></div>
+      </div>
+      <div class="fp-row" style="margin-bottom:10px;flex-wrap:wrap;">
+        <div class="fg"><label>نقطه ورود</label><input type="number" id="je-entry" step="any" style="width:110px"/></div>
+        <div class="fg"><label>حد ضرر</label><input type="number" id="je-sl" step="any" style="width:110px"/></div>
+        <div class="fg"><label>تارگت</label><input type="number" id="je-tp" step="any" style="width:110px"/></div>
+        <div class="fg"><label>سرمایه ورودی ($)</label><input type="number" id="je-cap" step="any" style="width:110px"/></div>
+        <div class="fg"><label>سود/ضرر ($)</label><input type="number" id="je-pnl" step="any" style="width:110px"/></div>
+      </div>
+      <div class="fg" style="width:100%;margin-bottom:10px;">
+        <label>یادداشت</label>
+        <textarea id="je-note" rows="2" style="width:100%;background:var(--s3);border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:11px;font-family:'Vazirmatn',sans-serif;outline:none;resize:vertical;"></textarea>
+      </div>
+      <button class="wl-add" onclick="saveTrade()" style="width:100%;padding:10px;font-size:12px;">💾 ذخیره معامله</button>
+    </div>
+
+    <div class="panel" style="margin:0;">
+      <div class="panel-title">📊 <span id="js-title">آمار ژورنال</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--text3);margin-bottom:3px;">کل معاملات</div><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;" id="js-total">0</div></div>
+        <div style="background:var(--s3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);"><div style="font-size:9px;color:var(--text3);margin-bottom:3px;">وین‌ریت</div><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--green);" id="js-wr">0%</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--text3);">Win</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--green);" id="js-wins">0</div></div>
+        <div style="background:rgba(255,23,68,.06);border:1px solid rgba(255,23,68,.2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--text3);">Loss</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--red);" id="js-losses">0</div></div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--text3);">ریسک‌فری</div><div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text3);" id="js-rf">0</div></div>
+        <div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:var(--text3);">P&L</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;" id="js-pnl">$0</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">آمار به تفکیک ارز</div>
+      <div id="js-per-sym"></div>
+    </div>
+
+    <div class="table-wrap" style="margin:0;">
+      <table style="min-width:800px;">
+        <thead><tr><th>ارز</th><th>تاریخ</th><th>جهت</th><th>ورود</th><th>SL</th><th>TP</th><th>سرمایه</th><th>P&L</th><th>نتیجه</th><th>حذف</th></tr></thead>
+        <tbody id="journal-tbody"></tbody>
       </table>
-    </div>
-
-    <!-- Page 2: Calculators -->
-    <div id="page2" class="p-6 hidden">
-      <div class="grid grid-cols-2 gap-8">
-        <!-- Basic Calculator -->
-        <div class="bg-zinc-900 rounded-3xl p-8">
-          <h3 class="text-xl font-bold mb-6 text-amber-400">ماشین حساب ساده</h3>
-          <input id="calcInput" type="text" class="w-full bg-black p-6 rounded-2xl text-3xl font-mono text-center" placeholder="0" readonly/>
-          <div class="grid grid-cols-4 gap-3 mt-6 text-xl">
-            <button onclick="calcAppend('7')" class="py-6 bg-zinc-800 rounded-2xl">7</button>
-            <button onclick="calcAppend('8')" class="py-6 bg-zinc-800 rounded-2xl">8</button>
-            <button onclick="calcAppend('9')" class="py-6 bg-zinc-800 rounded-2xl">9</button>
-            <button onclick="calcOp('/')" class="py-6 bg-orange-600 rounded-2xl">÷</button>
-            <!-- ... بقیه دکمه‌ها مشابه -->
-            <button onclick="calcClear()" class="py-6 bg-red-600 rounded-2xl col-span-2">C</button>
-            <button onclick="calcEquals()" class="py-6 bg-emerald-500 text-black rounded-2xl col-span-2">=</button>
-          </div>
-        </div>
-
-        <!-- Compound Calculator -->
-        <div class="bg-zinc-900 rounded-3xl p-8">
-          <h3 class="text-xl font-bold mb-6 text-purple-400">ماشین حساب سود مرکب</h3>
-          <input id="initial" placeholder="سرمایه اولیه" value="1000" class="w-full mb-4 p-4 bg-zinc-800 rounded-2xl"/>
-          <input id="profitPct" placeholder="درصد سود هر معامله" value="3" class="w-full mb-4 p-4 bg-zinc-800 rounded-2xl"/>
-          <input id="trades" placeholder="تعداد معاملات" value="20" class="w-full mb-6 p-4 bg-zinc-800 rounded-2xl"/>
-          <button onclick="calculateCompound()" class="w-full py-5 bg-purple-600 rounded-2xl font-bold">محاسبه سود مرکب</button>
-          <div id="compoundResult" class="mt-8 text-sm font-mono"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Page 3: Journal -->
-    <div id="page3" class="p-6 hidden">
-      <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-5 bg-zinc-900 rounded-3xl p-8">
-          <h3 class="text-xl font-bold mb-6">ثبت معامله جدید</h3>
-          <form id="journalForm" onsubmit="saveTrade(event)">
-            <input type="text" id="symbol" placeholder="نماد (مثال: SOLUSDT.P)" class="w-full p-4 mb-4 bg-zinc-800 rounded-2xl" required/>
-            <div class="grid grid-cols-2 gap-4">
-              <input type="date" id="tradeDate" class="p-4 bg-zinc-800 rounded-2xl"/>
-              <input type="time" id="tradeTime" class="p-4 bg-zinc-800 rounded-2xl"/>
-            </div>
-            <select id="direction" class="w-full p-4 mt-4 bg-zinc-800 rounded-2xl">
-              <option value="Long">لانگ (Long)</option>
-              <option value="Short">شورت (Short)</option>
-            </select>
-            <div class="grid grid-cols-2 gap-4 mt-4">
-              <input type="number" id="entry" placeholder="نقطه ورود" class="p-4 bg-zinc-800 rounded-2xl"/>
-              <input type="number" id="sl" placeholder="حد ضرر" class="p-4 bg-zinc-800 rounded-2xl"/>
-              <input type="number" id="target" placeholder="تارگت" class="p-4 bg-zinc-800 rounded-2xl"/>
-              <input type="number" id="resultAmount" placeholder="سود/ضرر دلاری" class="p-4 bg-zinc-800 rounded-2xl"/>
-            </div>
-            <select id="outcome" class="w-full p-4 mt-4 bg-zinc-800 rounded-2xl">
-              <option value="Win">Win</option>
-              <option value="Loss">Loss</option>
-              <option value="RiskFree">Risk Free</option>
-            </select>
-            <textarea id="notes" placeholder="یادداشت / احساسات معامله" class="w-full h-32 p-4 mt-4 bg-zinc-800 rounded-3xl"></textarea>
-            <button type="submit" class="mt-6 w-full py-5 bg-emerald-600 rounded-2xl font-bold">ذخیره معامله</button>
-          </form>
-        </div>
-
-        <div class="col-span-7">
-          <h3 class="text-xl font-bold mb-4">آمار ژورنال</h3>
-          <div id="journalStats" class="bg-zinc-900 rounded-3xl p-8 mb-6"></div>
-          <h3 class="text-xl font-bold mb-4">تاریخچه معاملات</h3>
-          <div id="journalTable" class="bg-zinc-900 rounded-3xl overflow-hidden"></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
 <!-- Chart Modal -->
-<div id="chartModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 modal">
-  <div class="bg-zinc-900 w-[95%] max-w-6xl rounded-3xl overflow-hidden">
-    <div class="flex justify-between p-4 border-b">
-      <h3 id="modalSymbol" class="text-2xl font-bold"></h3>
-      <button onclick="closeModal()" class="text-3xl text-zinc-400 hover:text-white">×</button>
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">—</span>
+      <div class="modal-tfs">
+        <button onclick="setChartTF('5m',this)" class="on">5m</button>
+        <button onclick="setChartTF('15m',this)">15m</button>
+        <button onclick="setChartTF('1h',this)">1H</button>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="p-4">
-      <iframe id="tvChart" width="100%" height="620" frameborder="0"></iframe>
-    </div>
-    <div class="p-4 text-xs text-zinc-500 text-center">
-      نکته: در چارت TradingView، Awesome Oscillator را روی تایم فریم ۱ ساعته تنظیم کنید + اندیکاتور FVG و Liquidity را اضافه کنید.
+    <div class="chart-area" id="chartArea"><canvas id="chartCanvas"></canvas></div>
+    <div class="chart-legend">
+      <div class="leg"><div class="leg-dot" style="background:#00e5ff"></div>EMA</div>
+      <div class="leg"><div class="leg-dot" style="background:#00e676"></div>FVG صعودی</div>
+      <div class="leg"><div class="leg-dot" style="background:#ff1744"></div>FVG نزولی</div>
+      <div class="leg"><div class="leg-dot" style="background:#ff9100;height:0;border-top:2px dashed #ff9100"></div>Liquidity</div>
     </div>
   </div>
 </div>
 
+<div class="toast-wrap" id="toasts"></div>
+
 <script>
-// ================== State & Config ==================
-let currentLang = 'fa';
-let alertsEnabled = true;
-let alertBeforeMinutes = 7;
-let trades = JSON.parse(localStorage.getItem('trades')) || [];
+// ══ CONFIG & STATE ══════════════════════════════
+const FAPI='https://fapi.binance.com';
+let watchlist=JSON.parse(localStorage.getItem('ao-wl')||'["SOLUSDT.P","BTCUSDT.P","ETHUSDT.P","BNBUSDT.P","XRPUSDT.P"]');
+let trades=JSON.parse(localStorage.getItem('ao-trades')||'[]');
+let alarmOn=true;
+let alarmTypes={fvg:true,liq:true,div:true};
+let alarmSound='chime';
+let notifEnabled=localStorage.getItem('ao-notif')==='true';
+let notifPerm=typeof Notification!=='undefined'?Notification.permission:'default';
+let lang=localStorage.getItem('ao-lang')||'fa';
+let chartSym=null,chartTF='5m';
+let cdVal=30,cdTimer;
+const scanCDs={};
+const alertCDs={};
+let dataCache={};
 
-// Simulated Symbols (you can add more)
-let symbols = [
-  {symbol: "SOLUSDT.P", price: 148.23, aoBias: "صعودی", fvg5m: "142.8 (لانگ)", fvg15m: "145.1 (لانگ)", fvg1h: "139.4 (لانگ)", liquidity: "149.8", macdDiv: "نزدیک به واگرایی", lastUpdate: "12 ثانیه قبل"},
-  {symbol: "BTCUSDT.P", price: 67234, aoBias: "صعودی", fvg5m: "66850 (لانگ)", fvg15m: "-", fvg1h: "66100 (لانگ)", liquidity: "67500", macdDiv: "واگرایی تأیید شده", lastUpdate: "48 ثانیه قبل"},
-  {symbol: "XAUUSD", price: 2658.4, aoBias: "نزولی", fvg5m: "2678 (شورت)", fvg15m: "2685 (شورت)", fvg1h: "-", liquidity: "2642", macdDiv: "نزدیک به واگرایی", lastUpdate: "9 ثانیه قبل"}
-];
+// ══ i18n ══════════════════════════════════════
+const TR={
+  fa:{
+    scanner:'📡 اسکنر',calc:'🧮 ماشین‌حساب',journal:'📓 ژورنال',
+    alarm_on:'روشن',alarm_off:'خاموش',
+    notif:'🔔',lang:'EN',
+    tehran:'تهران',london:'لندن',ny:'نیویورک',tokyo:'توکیو',
+    open:'باز',closed:'بسته',overlap:'Overlap 🔥',
+    filt_title:'🧠 فیلترهای محاسباتی هوشمند',
+    ao_tf_lbl:'AO تایم‌فریم',early_lbl:'هشدار زودهنگام (دقیقه)',
+    div_tf_lbl:'تایم‌فریم واگرایی MACD',near_lbl:'آستانه نزدیکی (%)',
+    apply:'↺ اعمال و اسکن',wl_title:'📋 مدیریت واچ‌لیست',
+    wl_add:'+ اضافه',
+    th_ao:'AO (1H)',th_div:'واگرایی MACD',
+    ao_bull:'📈 صعودی',ao_bear:'📉 نزولی',ao_neu:'— خنثی',
+    dir_long:'🟢 فقط لانگ',dir_short:'🔴 فقط شورت',dir_neu:'⚪ —',
+    scanning:'در حال اسکن...',no_fvg:'—',no_liq:'—',no_div:'—',
+    near_warn:'⚡ نزدیک!',div_forming:'⚡ در حال شکل‌گیری',
+    saved:'ذخیره شد ✅',deleted:'حذف شد',
+    je_title:'✏️ ثبت معامله جدید',js_title:'📊 آمار ژورنال',
+    sc_title:'🔢 ماشین‌حساب ساده',ci_title:'📈 سود مرکب',
+    lbl_final:'سرمایه نهایی',lbl_profit:'کل سود',lbl_growth:'رشد کل',
+  },
+  en:{
+    scanner:'📡 Scanner',calc:'🧮 Calculator',journal:'📓 Journal',
+    alarm_on:'ON',alarm_off:'OFF',
+    notif:'🔔',lang:'فا',
+    tehran:'Tehran',london:'London',ny:'New York',tokyo:'Tokyo',
+    open:'OPEN',closed:'CLOSED',overlap:'OVERLAP 🔥',
+    filt_title:'🧠 Smart Filters',
+    ao_tf_lbl:'AO Timeframe',early_lbl:'Early Alert (min)',
+    div_tf_lbl:'MACD Div Timeframe',near_lbl:'Near Threshold (%)',
+    apply:'↺ Apply & Scan',wl_title:'📋 Watchlist',
+    wl_add:'+ Add',
+    th_ao:'AO (1H)',th_div:'MACD Divergence',
+    ao_bull:'📈 Bullish',ao_bear:'📉 Bearish',ao_neu:'— Neutral',
+    dir_long:'🟢 Long Only',dir_short:'🔴 Short Only',dir_neu:'⚪ —',
+    scanning:'Scanning...',no_fvg:'—',no_liq:'—',no_div:'—',
+    near_warn:'⚡ Near!',div_forming:'⚡ Forming',
+    saved:'Saved ✅',deleted:'Deleted',
+    je_title:'✏️ New Trade',js_title:'📊 Journal Stats',
+    sc_title:'🔢 Calculator',ci_title:'📈 Compound Interest',
+    lbl_final:'Final Balance',lbl_profit:'Total Profit',lbl_growth:'Total Growth',
+  }
+};
+const t=k=>TR[lang][k]||k;
 
-// ================== Language ==================
-function toggleLanguage() {
-  currentLang = currentLang === 'fa' ? 'en' : 'fa';
-  document.getElementById('langBtn').textContent = currentLang === 'fa' ? 'English' : 'فارسی';
-  renderAll();
+function toggleLang(){lang=lang==='fa'?'en':'fa';localStorage.setItem('ao-lang',lang);applyLang();}
+function applyLang(){
+  const fa=lang==='fa';
+  document.documentElement.dir=fa?'rtl':'ltr';
+  document.documentElement.lang=lang;
+  document.getElementById('langBtn').textContent=t('lang');
+  ['tehran','london','ny','tokyo'].forEach(k=>{const el=document.getElementById('cc-'+k);if(el)el.textContent=t(k);});
+  document.getElementById('tog-alarm-lbl').textContent=alarmOn?t('alarm_on'):t('alarm_off');
+  const et=document.getElementById('filt-title');if(et)et.textContent=t('filt_title');
+  renderScanner();renderJournalStats();renderJournalTable();
 }
 
-// ================== Clocks ==================
-function updateClocks() {
-  const zones = [
-    {name: "توکیو", tz: "Asia/Tokyo"},
-    {name: "لندن", tz: "Europe/London"},
-    {name: "نیویورک", tz: "America/New_York"},
-    {name: "تهران", tz: "Asia/Tehran"}
-  ];
-  let html = '';
-  zones.forEach(z => {
-    const time = new Intl.DateTimeFormat('fa-IR', {timeZone: z.tz, hour:'2-digit', minute:'2-digit'}).format(new Date());
-    html += `<div><span class="text-emerald-400">${z.name}</span> <span class="font-mono">${time}</span></div>`;
+// ══ AUDIO ══════════════════════════════════════
+let AC;try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+function playAlarm(force=false){
+  if(!alarmOn&&!force)return;
+  if(!AC)return;
+  try{
+    AC.resume();
+    const g=AC.createGain();g.connect(AC.destination);
+    const now=AC.currentTime;
+    if(alarmSound==='chime'){
+      g.gain.setValueAtTime(.35,now);
+      [523,659,784,880].forEach((f,i)=>{
+        const o=AC.createOscillator(),og=AC.createGain();
+        o.type='sine';o.frequency.value=f;
+        og.gain.setValueAtTime(.3,now+i*.25);og.gain.exponentialRampToValueAtTime(.001,now+i*.25+.5);
+        o.connect(og);og.connect(AC.destination);o.start(now+i*.25);o.stop(now+i*.25+.6);
+      });
+    }else if(alarmSound==='ding'){
+      const o=AC.createOscillator(),og=AC.createGain();
+      o.type='sine';o.frequency.value=1046;
+      og.gain.setValueAtTime(.5,now);og.gain.exponentialRampToValueAtTime(.001,now+1.5);
+      o.connect(og);og.connect(AC.destination);o.start(now);o.stop(now+1.8);
+    }else if(alarmSound==='pop'){
+      const o=AC.createOscillator(),og=AC.createGain();
+      o.type='sine';o.frequency.value=800;o.frequency.exponentialRampToValueAtTime(200,now+.15);
+      og.gain.setValueAtTime(.4,now);og.gain.exponentialRampToValueAtTime(.001,now+.2);
+      o.connect(og);og.connect(AC.destination);o.start(now);o.stop(now+.25);
+    }else{
+      g.gain.setValueAtTime(.25,now);
+      [440,550].forEach((f,i)=>{
+        const o=AC.createOscillator(),og=AC.createGain();
+        o.type='sine';o.frequency.value=f;
+        og.gain.setValueAtTime(.3,now+i*.5);og.gain.exponentialRampToValueAtTime(.001,now+i*.5+.8);
+        o.connect(og);og.connect(AC.destination);o.start(now+i*.5);o.stop(now+i*.5+1);
+      });
+    }
+  }catch(e){}
+}
+function toggleAlarms(){
+  alarmOn=!alarmOn;
+  document.getElementById('tog-alarm').classList.toggle('on',alarmOn);
+  document.getElementById('tog-alarm-lbl').textContent=alarmOn?t('alarm_on'):t('alarm_off');
+}
+function setSound(s,el){
+  alarmSound=s;
+  document.querySelectorAll('.sopt').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+function togAT(el){
+  const t=el.dataset.t;
+  alarmTypes[t]=!alarmTypes[t];
+  el.classList.toggle('on',alarmTypes[t]);
+}
+
+// ══ NOTIFICATIONS ══════════════════════════════
+async function toggleNotif(){
+  if(notifPerm==='denied'){showToast('اعلان در مرورگر مسدود است','warn');return;}
+  if(notifPerm!=='granted'){notifPerm=await Notification.requestPermission();if(notifPerm!=='granted')return;}
+  notifEnabled=!notifEnabled;localStorage.setItem('ao-notif',notifEnabled);
+  showToast(notifEnabled?'اعلان فعال شد 🔔':'اعلان خاموش شد','info');
+}
+function pushNotif(title,body){
+  if(!notifEnabled||notifPerm!=='granted')return;
+  try{const n=new Notification(title,{body,tag:title});setTimeout(()=>n.close(),8000);}catch(e){}
+}
+
+// ══ TOAST ══════════════════════════════════════
+function showToast(msg,cls='info',dur=4000){
+  const w=document.getElementById('toasts');
+  const d=document.createElement('div');d.className=`toast ${cls}`;d.textContent=msg;
+  w.appendChild(d);setTimeout(()=>d.remove(),dur);
+}
+
+// ══ ALERT FIRE ═════════════════════════════════
+function fireAlert(key,msg,type){
+  if(!alarmTypes[type])return;
+  if(alertCDs[key])return;
+  alertCDs[key]=true;setTimeout(()=>delete alertCDs[key],120000);
+  playAlarm();showToast(msg,'warn',7000);pushNotif('⚡ AO Trader',msg);
+}
+
+// ══ CLOCKS ═════════════════════════════════════
+function updateClocks(){
+  const now=new Date();
+  const utcH=now.getUTCHours();
+  const isOverlap=utcH>=13&&utcH<17;
+  [{id:'tehran',tz:'Asia/Tehran',sess:[]},
+   {id:'london',tz:'Europe/London',sess:[[8,17]]},
+   {id:'ny',tz:'America/New_York',sess:[[9,17]]},
+   {id:'tokyo',tz:'Asia/Tokyo',sess:[[9,15]]}
+  ].forEach(z=>{
+    const time=new Intl.DateTimeFormat('en',{timeZone:z.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(now);
+    document.getElementById('ct-'+z.id).textContent=time;
+    const h=parseInt(time);
+    const isOpen=z.sess.some(([s,e])=>h>=s&&h<e);
+    const card=document.getElementById('ck-'+z.id);
+    const st=document.getElementById('cs-'+z.id);
+    if(isOverlap&&(z.id==='london'||z.id==='ny')&&isOpen){
+      card.className='clock-card overlap';st.className='cc-status cs-overlap';st.textContent=t('overlap');
+    }else if(isOpen){
+      card.className='clock-card open';st.className='cc-status cs-open';st.textContent=t('open');
+    }else{
+      card.className='clock-card';st.className='cc-status cs-closed';st.textContent=z.sess.length?t('closed'):'—';
+    }
   });
-  document.getElementById('clocks').innerHTML = html;
 }
 
-// ================== Dashboard Table ==================
-function renderDashboard() {
-  const tbody = document.getElementById('dashboardTable');
-  tbody.innerHTML = symbols.map(item => `
-    <tr onclick="openChart('${item.symbol}')" class="border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/70">
-      <td class="p-4 font-bold font-mono">${item.symbol}</td>
-      <td class="p-4 text-center">${item.price}</td>
-      <td class="p-4 text-center ${item.aoBias === 'صعودی' ? 'text-emerald-400' : 'text-red-400'} font-bold">${item.aoBias}</td>
-      <td class="p-4 text-center">${item.fvg5m}</td>
-      <td class="p-4 text-center">${item.fvg15m}</td>
-      <td class="p-4 text-center">${item.fvg1h}</td>
-      <td class="p-4 text-center text-amber-400">${item.liquidity}</td>
-      <td class="p-4 text-center text-sky-400">${item.macdDiv}</td>
-      <td class="p-4 text-center text-xs text-zinc-500">${item.lastUpdate}</td>
-    </tr>
-  `).join('');
+// ══ PAGE SWITCH ════════════════════════════════
+function switchPage(id,el){
+  document.querySelectorAll('.pnav-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('page-'+id).classList.add('on');
+  if(id==='journal'){renderJournalStats();renderJournalTable();}
 }
 
-// ================== Chart Modal ==================
-function openChart(symbol) {
-  document.getElementById('modalSymbol').textContent = symbol;
-  const iframe = document.getElementById('tvChart');
-  iframe.src = `https://www.tradingview.com/widgetembed/?symbol=${encodeURIComponent(symbol.includes('.') ? 'BINANCE:' + symbol : 'OANDA:' + symbol)}&theme=dark&interval=5`;
-  document.getElementById('chartModal').classList.remove('hidden');
+// ══ WATCHLIST ══════════════════════════════════
+function addWL(){
+  let v=document.getElementById('wl-inp').value.trim().toUpperCase();
+  if(!v)return;
+  if(!v.endsWith('.P')&&!v.includes('/'))v+='.P';
+  if(watchlist.includes(v)){document.getElementById('wl-inp').value='';return;}
+  watchlist.push(v);saveWL();
+  document.getElementById('wl-inp').value='';
+  renderWLTags();renderScanner();
+}
+function removeWL(sym){watchlist=watchlist.filter(s=>s!==sym);saveWL();renderWLTags();renderScanner();}
+function saveWL(){localStorage.setItem('ao-wl',JSON.stringify(watchlist));}
+function renderWLTags(){
+  document.getElementById('wl-tags').innerHTML=watchlist.map(s=>`<div class="wl-tag">${s}<button onclick="removeWL('${s}')">×</button></div>`).join('');
 }
 
-function closeModal() {
-  document.getElementById('chartModal').classList.add('hidden');
+// ══ BINANCE API ════════════════════════════════
+function toFAPISymbol(sym){return sym.replace('.P','').toUpperCase();}
+async function getKlines(sym,tf,limit=300){
+  const s=toFAPISymbol(sym);
+  const r=await fetch(`${FAPI}/fapi/v1/klines?symbol=${s}&interval=${tf}&limit=${limit}`);
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  const d=await r.json();
+  return d.map(c=>({ts:+c[0],o:+c[1],h:+c[2],l:+c[3],c:+c[4],v:+c[5]}));
+}
+async function getTicker(sym){
+  const r=await fetch(`${FAPI}/fapi/v1/ticker/24hr?symbol=${toFAPISymbol(sym)}`);
+  if(!r.ok)throw new Error();
+  return r.json();
 }
 
-// ================== Alert System ==================
-let alertSoundType = 'beep1';
-
-function playAlert() {
-  if (!alertsEnabled) return;
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  osc.frequency.value = alertSoundType === 'beep1' ? 880 : 1200;
-  osc.type = 'sine';
-  osc.connect(ctx.destination);
-  osc.start();
-  setTimeout(() => osc.stop(), 800);
+// ══ MATH ═══════════════════════════════════════
+function sma(arr,p){if(arr.length<p)return null;return arr.slice(-p).reduce((a,b)=>a+b,0)/p;}
+function calcAO(klines){
+  const mids=klines.map(c=>(c.h+c.l)/2);
+  const fast=sma(mids,5),slow=sma(mids,34);
+  if(fast===null||slow===null)return null;
+  // prev AO
+  const prevMids=mids.slice(0,-1);
+  const prevFast=sma(prevMids,5),prevSlow=sma(prevMids,34);
+  const prev=(prevFast!==null&&prevSlow!==null)?prevFast-prevSlow:null;
+  const cur=fast-slow;
+  return{value:cur,prev,bullish:cur>0,crossedUp:prev!==null&&prev<=0&&cur>0,crossedDown:prev!==null&&prev>=0&&cur<0};
+}
+function emaSer(arr,p){
+  if(arr.length<p)return[];
+  const k=2/(p+1);let e=arr.slice(0,p).reduce((a,b)=>a+b,0)/p;
+  const out=[e];for(let i=p;i<arr.length;i++){e=arr[i]*k+e*(1-k);out.push(e);}
+  return out;
+}
+function lastEma(arr,p){const s=emaSer(arr,p);return s.length?s[s.length-1]:null;}
+function macdSer(c,f=12,s=26,sg=9){
+  if(c.length<s+sg+2)return[];
+  const ef=emaSer(c,f),es=emaSer(c,s);
+  const off=ef.length-es.length;
+  const ml=es.map((v,i)=>ef[i+off]-v);
+  if(ml.length<sg+1)return[];
+  const sl=emaSer(ml,sg);const soff=ml.length-sl.length;
+  return sl.map((sv,i)=>({line:ml[i+soff],signal:sv,hist:ml[i+soff]-sv}));
+}
+function calcRSI(c,p=14){
+  if(c.length<p+1)return null;
+  let ag=0,al=0;
+  for(let i=1;i<=p;i++){const d=c[i]-c[i-1];d>0?ag+=d:al+=Math.abs(d);}
+  ag/=p;al/=p;
+  for(let i=p+1;i<c.length;i++){const d=c[i]-c[i-1];ag=(ag*(p-1)+Math.max(d,0))/p;al=(al*(p-1)+Math.max(-d,0))/p;}
+  return al===0?100:100-100/(1+ag/al);
+}
+function pivots(arr,s=3){
+  const lo=[],hi=[];
+  for(let i=s;i<arr.length-s;i++){
+    const vs=[...Array(s*2+1).keys()].map(j=>j+i-s).filter(j=>j!==i).map(j=>arr[j]);
+    if(arr[i]<Math.min(...vs))lo.push({i,v:arr[i]});
+    if(arr[i]>Math.max(...vs))hi.push({i,v:arr[i]});
+  }
+  return{lo,hi};
 }
 
-function openAlertSettings() {
-  const settings = prompt(`تنظیمات آلارم:\n\n1. دقیقه قبل از رسیدن به محدوده (${alertBeforeMinutes})\n2. نوع صدا (beep1 یا beep2)\n3. آلارم روی چه مواردی بدهد؟ (FVG, Liquidity, MACD)\n\nعدد دقیقه را وارد کنید:`);
-  if (settings) alertBeforeMinutes = parseInt(settings) || 7;
-  alert(`آلارم ${alertBeforeMinutes} دقیقه قبل از رسیدن به محدوده فعال است.\n\nصدای فعلی: ${alertSoundType}`);
+// ══ FVG ════════════════════════════════════════
+function detectFVGs(kl,isLong){
+  const fvgs=[];const last=kl.length;
+  for(let i=1;i<last-1;i++){
+    const prev=kl[i-1],curr=kl[i],nxt=kl[i+1];
+    if(isLong&&nxt.l>prev.h){
+      const top=nxt.l,bot=prev.h;
+      if(!kl.slice(i+2).some(c=>c.h>curr.h))continue;
+      if(kl.slice(i+1).some(c=>c.l<bot))continue;
+      const cp=kl[last-1].c;
+      if(cp<bot||(cp>=bot&&cp<=top))continue;
+      fvgs.push({type:'bull',top,bot,mid:(top+bot)/2,ts:curr.ts});
+    }
+    if(!isLong&&nxt.h<prev.l){
+      const top=prev.l,bot=nxt.h;
+      if(!kl.slice(i+2).some(c=>c.l<curr.l))continue;
+      if(kl.slice(i+1).some(c=>c.h>top))continue;
+      const cp=kl[last-1].c;
+      if(cp>top||(cp>=bot&&cp<=top))continue;
+      fvgs.push({type:'bear',top,bot,mid:(top+bot)/2,ts:curr.ts});
+    }
+  }
+  return fvgs.slice(-3);
 }
 
-// ================== Page Navigation ==================
-function showPage(n) {
-  document.querySelectorAll('#page1,#page2,#page3').forEach(p => p.classList.add('hidden'));
-  document.getElementById(`page${n}`).classList.remove('hidden');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+// ══ LIQUIDITY ══════════════════════════════════
+function detectLiq(kl,isLong,lb=100){
+  const sl=kl.slice(-lb);const price=sl[sl.length-1].c;const levels=[];
+  for(let i=3;i<sl.length-3;i++){
+    const isH=sl[i].h>sl[i-1].h&&sl[i].h>sl[i-2].h&&sl[i].h>sl[i-3].h&&sl[i].h>sl[i+1].h&&sl[i].h>sl[i+2].h&&sl[i].h>sl[i+3].h;
+    const isL=sl[i].l<sl[i-1].l&&sl[i].l<sl[i-2].l&&sl[i].l<sl[i-3].l&&sl[i].l<sl[i+1].l&&sl[i].l<sl[i+2].l&&sl[i].l<sl[i+3].l;
+    if(isLong&&isL&&sl[i].l<price){
+      if(sl.slice(i+1).some(c=>c.l<sl[i].l*.9995))continue;
+      levels.push({type:'SSL',price:sl[i].l,dist:(price-sl[i].l)/price*100});
+    }
+    if(!isLong&&isH&&sl[i].h>price){
+      if(sl.slice(i+1).some(c=>c.h>sl[i].h*1.0005))continue;
+      levels.push({type:'BSL',price:sl[i].h,dist:(sl[i].h-price)/price*100});
+    }
+  }
+  return levels.sort((a,b)=>a.dist-b.dist).slice(0,3);
 }
 
-// ================== Journal ==================
-function saveTrade(e) {
-  e.preventDefault();
-  const trade = {
-    symbol: document.getElementById('symbol').value,
-    date: document.getElementById('tradeDate').value,
-    time: document.getElementById('tradeTime').value,
-    direction: document.getElementById('direction').value,
-    entry: document.getElementById('entry').value,
-    sl: document.getElementById('sl').value,
-    target: document.getElementById('target').value,
-    resultAmount: document.getElementById('resultAmount').value,
-    outcome: document.getElementById('outcome').value,
-    notes: document.getElementById('notes').value,
-    timestamp: new Date().toISOString()
+// ══ MACD DIVERGENCE (3 confirmations) ═════════
+function detectMACDDiv(prices,ms,isLong){
+  const n=Math.min(prices.length,ms.length,80);if(n<20)return null;
+  const p=prices.slice(-n),m=ms.slice(-n);
+  const li=m.map(x=>x.line),si=m.map(x=>x.signal),hi=m.map(x=>x.hist);
+  const pp=pivots(p,3),pl=pivots(li,3),ps=pivots(si,3),ph=pivots(hi,3);
+  // Forming check: last candle approaching divergence
+  if(isLong&&pp.lo.length>=1&&pl.lo.length>=1){
+    const lp=p[p.length-1],ll=li[li.length-1],ls=si[si.length-1],lh=hi[hi.length-1];
+    const rpl=pp.lo.at(-1),rll=pl.lo.at(-1),rls=ps.lo.at(-1),rlh=ph.lo.at(-1);
+    if(lp<=rpl.v*1.005&&ll>rll.v*1.01&&ls>rls.v*1.01)return{type:'forming-bull',label:'⚡ صعودی در شکل‌گیری',forming:true};
+  }
+  if(!isLong&&pp.hi.length>=1&&pl.hi.length>=1){
+    const lp=p[p.length-1],ll=li[li.length-1],ls=si[si.length-1],lh=hi[hi.length-1];
+    const rph=pp.hi.at(-1),rlh2=pl.hi.at(-1),rls=ps.hi.at(-1);
+    if(lp>=rph.v*.995&&ll<rlh2.v*.99&&ls<rls.v*.99)return{type:'forming-bear',label:'⚡ نزولی در شکل‌گیری',forming:true};
+  }
+  // Full divergence
+  if(isLong&&pp.lo.length>=2&&pl.lo.length>=2&&ps.lo.length>=2&&ph.lo.length>=2){
+    if(pp.lo.at(-2).v>pp.lo.at(-1).v&&pl.lo.at(-2).v<pl.lo.at(-1).v&&ps.lo.at(-2).v<ps.lo.at(-1).v&&ph.lo.at(-2).v<ph.lo.at(-1).v)
+      return{type:'bull',label:'🟢 صعودی (3تأیید)',forming:false};
+  }
+  if(!isLong&&pp.hi.length>=2&&pl.hi.length>=2&&ps.hi.length>=2&&ph.hi.length>=2){
+    if(pp.hi.at(-2).v<pp.hi.at(-1).v&&pl.hi.at(-2).v>pl.hi.at(-1).v&&ps.hi.at(-2).v>ps.hi.at(-1).v&&ph.hi.at(-2).v>ph.hi.at(-1).v)
+      return{type:'bear',label:'🔴 نزولی (3تأیید)',forming:false};
+  }
+  return null;
+}
+
+// ══ SCAN ONE SYMBOL ════════════════════════════
+async function scanSymbol(sym){
+  try{
+    const aoTF=document.getElementById('cfg-ao-tf').value;
+    const divTF=document.getElementById('cfg-div-tf').value;
+    const nearPct=parseFloat(document.getElementById('cfg-near').value)||0.5;
+    const earlyMin=parseInt(document.getElementById('cfg-early').value)||7;
+
+    const [tick,klAO,kl5m,kl15m,kl1h,klDiv]=await Promise.all([
+      getTicker(sym),
+      getKlines(sym,aoTF,100),
+      getKlines(sym,'5m',300),
+      getKlines(sym,'15m',300),
+      getKlines(sym,'1h',200),
+      getKlines(sym,divTF,300)
+    ]);
+
+    const price=parseFloat(tick.lastPrice);
+    const ao=calcAO(klAO);
+    const isLong=ao?ao.bullish:null;
+
+    const fvg5=isLong!==null?detectFVGs(kl5m,isLong):[];
+    const fvg15=isLong!==null?detectFVGs(kl15m,isLong):[];
+    const fvg1h=isLong!==null?detectFVGs(kl1h,isLong):[];
+    const liq=isLong!==null?detectLiq(kl1h,isLong,100):[];
+
+    const closes=klDiv.map(c=>c.c);
+    const ms=macdSer(closes);
+    const macdDiv=ms.length&&isLong!==null?detectMACDDiv(closes,ms,isLong):null;
+
+    // Early warning: check if approaching FVG/Liq within earlyMin candles
+    const atr=kl5m.slice(-14).reduce((a,c)=>a+(c.h-c.l),0)/14;
+    const earlyDist=atr*(earlyMin/5); // approx distance
+
+    // Fire alerts
+    fvg5.concat(fvg15).concat(fvg1h).forEach(f=>{
+      const dist=isLong?(price-f.top)/price*100:(f.bot-price)/price*100;
+      if(dist>=0&&dist<=nearPct){
+        fireAlert(`${sym}_fvg_${f.ts}`,`📐 ${sym} — قیمت نزدیک FVG ${f.type==='bull'?'صعودی':'نزولی'}! فاصله: ${dist.toFixed(2)}%`,'fvg');
+      }
+    });
+    liq.forEach(l=>{
+      if(l.dist<=nearPct){
+        fireAlert(`${sym}_liq_${Math.round(l.price*100)}`,`💧 ${sym} — نزدیک ${l.type}! فاصله: ${l.dist.toFixed(2)}%`,'liq');
+      }
+    });
+    if(macdDiv){
+      fireAlert(`${sym}_div_${macdDiv.type}`,`🔵 ${sym} — MACD واگرایی ${macdDiv.label}`,'div');
+    }
+
+    dataCache[sym]={price,ao,isLong,fvg5,fvg15,fvg1h,liq,macdDiv,ts:Date.now(),kl5m,kl15m,kl1h};
+    return dataCache[sym];
+  }catch(e){return null;}
+}
+
+// ══ RENDER TABLE ═══════════════════════════════
+function fmtP(v){
+  if(!v&&v!==0)return'—';
+  if(v>=1000)return v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(v>=1)return v.toFixed(4);
+  return v.toFixed(6);
+}
+function renderFVGs(fvgs,price){
+  if(!fvgs||!fvgs.length)return'<span style="color:var(--text3);font-size:9px;">—</span>';
+  const nearPct=parseFloat(document.getElementById('cfg-near').value)||0.5;
+  return fvgs.map(f=>{
+    const dist=f.type==='bull'?(price-f.top)/price*100:(f.bot-price)/price*100;
+    const near=dist>=0&&dist<=nearPct;
+    const cls=f.type==='bull'?'fvg-b':'fvg-s';
+    return`<span class="${cls}${near?' near':''}">${f.type==='bull'?'▲':'▼'}${near?'⚡':''}<span style="font-size:7px;opacity:.8"> ${fmtP(f.bot)}–${fmtP(f.top)}</span></span>`;
+  }).join('');
+}
+function renderLiq(liq,price){
+  if(!liq||!liq.length)return'<span style="color:var(--text3);font-size:9px;">—</span>';
+  const nearPct=parseFloat(document.getElementById('cfg-near').value)||0.5;
+  return liq.map(l=>{
+    const near=l.dist<=nearPct;
+    const cls=l.type==='SSL'?'liq-b':'liq-s';
+    return`<span class="${cls}${near?' near':''}">${l.type}${near?'⚡':''} $${fmtP(l.price)}</span>`;
+  }).join('');
+}
+function renderScanner(){
+  const tbody=document.getElementById('scanner-tbody');
+  if(!watchlist.length){tbody.innerHTML=`<tr><td colspan="10" class="ldc" style="text-align:center;padding:30px;">واچ‌لیست خالی است — ارزی اضافه کنید</td></tr>`;return;}
+  tbody.innerHTML=watchlist.map(sym=>{
+    const d=dataCache[sym];
+    if(!d)return`<tr id="row-${sym.replace('.','_')}"><td class="td-sym" onclick="openChart('${sym}')">${sym}</td><td colspan="9" class="ldc"><span class="spinner"></span> در حال اسکن...</td></tr>`;
+    const aoHtml=d.ao?
+      (d.ao.bullish?`<span class="ao-bull">${t('ao_bull')} ${d.ao.crossedUp?'🆕':''} ${d.ao.value.toFixed(4)}</span>`:
+       `<span class="ao-bear">${t('ao_bear')} ${d.ao.crossedDown?'🆕':''} ${d.ao.value.toFixed(4)}</span>`):
+      `<span class="ao-neutral">—</span>`;
+    const dirHtml=d.isLong===true?`<span class="dir-long">${t('dir_long')}</span>`:
+      d.isLong===false?`<span class="dir-short">${t('dir_short')}</span>`:`<span class="dir-neutral">—</span>`;
+    const divHtml=d.macdDiv?
+      `<span class="div-warn">${d.macdDiv.label}</span>`:`<span class="dnone">—</span>`;
+    const now=new Date(d.ts).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    return`<tr id="row-${sym.replace('.','_')}" onclick="openChart('${sym}')">
+      <td class="td-sym">${sym}</td>
+      <td class="td-price">$${fmtP(d.price)}</td>
+      <td>${aoHtml}</td>
+      <td>${dirHtml}</td>
+      <td>${renderFVGs(d.fvg5,d.price)}</td>
+      <td>${renderFVGs(d.fvg15,d.price)}</td>
+      <td>${renderFVGs(d.fvg1h,d.price)}</td>
+      <td>${renderLiq(d.liq,d.price)}</td>
+      <td>${divHtml}</td>
+      <td class="upd">${now}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function refreshAll(){
+  renderScanner();
+  for(const sym of watchlist){
+    await scanSymbol(sym);
+    renderScanner();
+    await new Promise(r=>setTimeout(r,200));
+  }
+}
+function applyAndRefresh(){
+  document.getElementById('th-ao').textContent=`AO (${document.getElementById('cfg-ao-tf').value.toUpperCase()})`;
+  document.getElementById('th-div').textContent=`MACD Div (${document.getElementById('cfg-div-tf').value})`;
+  dataCache={};renderScanner();refreshAll();
+}
+
+// ══ CHART MODAL ════════════════════════════════
+function openChart(sym){
+  chartSym=sym;
+  document.getElementById('modalTitle').textContent=sym+' — FVG & Liquidity Chart';
+  document.getElementById('modalBg').classList.add('open');
+  drawChart();
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');chartSym=null;}
+async function setChartTF(tf,el){
+  chartTF=tf;
+  document.querySelectorAll('.modal-tfs button').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  drawChart();
+}
+async function drawChart(){
+  if(!chartSym)return;
+  const area=document.getElementById('chartArea');
+  const canvas=document.getElementById('chartCanvas');
+  canvas.width=area.clientWidth||900;canvas.height=area.clientHeight||420;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#03050c';ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  let cached=dataCache[chartSym];
+  if(!cached){
+    ctx.fillStyle='#4a607a';ctx.font='14px Vazirmatn';ctx.textAlign='center';
+    ctx.fillText('در حال بارگذاری...',canvas.width/2,canvas.height/2);
+    return;
+  }
+
+  const kl=chartTF==='5m'?cached.kl5m:chartTF==='15m'?cached.kl15m:cached.kl1h;
+  const fvgs=chartTF==='5m'?cached.fvg5:chartTF==='15m'?cached.fvg15:cached.fvg1h;
+  const liq=cached.liq||[];
+  const isLong=cached.isLong;
+
+  const N=Math.min(70,kl.length);
+  const d=kl.slice(-N);
+  const W=canvas.width,H=canvas.height;
+  const PAD={t:28,b:28,l:6,r:80};
+  const cw=(W-PAD.l-PAD.r)/N;
+  const bw=Math.max(cw*.6,1.5);
+
+  const closes=kl.map(c=>c.c);
+  const emaArr=emaSer(closes,9);
+  const emaAl=[...new Array(kl.length-emaArr.length).fill(null),...emaArr];
+  const dispEma=emaAl.slice(-N);
+
+  let mn=Infinity,mx=-Infinity;
+  d.forEach(c=>{mn=Math.min(mn,c.l);mx=Math.max(mx,c.h);});
+  fvgs.forEach(f=>{mn=Math.min(mn,f.bot);mx=Math.max(mx,f.top);});
+  liq.forEach(l=>{mn=Math.min(mn,l.price);mx=Math.max(mx,l.price);});
+  const rng=mx-mn||1;mn-=rng*.06;mx+=rng*.06;
+
+  const toY=v=>PAD.t+(mx-v)/(mx-mn)*(H-PAD.t-PAD.b);
+  const toX=i=>PAD.l+i*cw+cw/2;
+
+  // Background
+  ctx.fillStyle='#060810';ctx.fillRect(PAD.l,PAD.t,W-PAD.l-PAD.r,H-PAD.t-PAD.b);
+
+  // Grid
+  for(let i=0;i<=6;i++){
+    const y=PAD.t+i*(H-PAD.t-PAD.b)/6;
+    const v=mx-i*(mx-mn)/6;
+    ctx.strokeStyle='#1e2d48';ctx.lineWidth=.4;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
+    ctx.fillStyle='#4a607a';ctx.font='8px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(fmtP(v),W-PAD.r+3,y+3);
+  }
+
+  // FVG zones
+  fvgs.forEach(f=>{
+    const y1=toY(f.top),y2=toY(f.bot);
+    const col=f.type==='bull'?'#00e676':'#ff1744';
+    ctx.fillStyle=col+'18';ctx.fillRect(PAD.l,Math.min(y1,y2),W-PAD.l-PAD.r,Math.abs(y2-y1));
+    ctx.strokeStyle=col+'55';ctx.lineWidth=.8;ctx.setLineDash([2,2]);
+    [y1,y2].forEach(y=>{ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();});
+    ctx.setLineDash([]);
+    ctx.fillStyle=col;ctx.font='bold 8px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(`FVG ${f.type==='bull'?'▲':'▼'}`,PAD.l+4,Math.min(y1,y2)+9);
+  });
+
+  // Liquidity lines
+  liq.forEach(l=>{
+    const y=toY(l.price);
+    ctx.strokeStyle='#ff910099';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#ff9100';ctx.font='bold 8px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(`${l.type} $${fmtP(l.price)}`,W-PAD.r+3,y+3);
+  });
+
+  // Candles
+  d.forEach((c,i)=>{
+    const x=toX(i),oY=toY(c.o),cY=toY(c.c),hY=toY(c.h),lY=toY(c.l);
+    const bull=c.c>=c.o;const col=bull?'#00e676':'#ff1744';
+    ctx.strokeStyle=bull?'#00e67677':'#ff174477';ctx.lineWidth=.7;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(x,hY);ctx.lineTo(x,lY);ctx.stroke();
+    ctx.fillStyle=col;const top=Math.min(oY,cY),ht=Math.max(Math.abs(cY-oY),1.2);
+    ctx.fillRect(x-bw/2,top,bw,ht);
+    if(!bull&&ht>3){ctx.fillStyle='#03050ccc';ctx.fillRect(x-bw/2+1,top+1,bw-2,ht-2);}
+  });
+
+  // EMA
+  ctx.strokeStyle='#00e5ff';ctx.lineWidth=1.5;ctx.setLineDash([]);
+  ctx.shadowColor='rgba(0,229,255,.35)';ctx.shadowBlur=3;
+  ctx.beginPath();let em=false;
+  dispEma.forEach((v,i)=>{if(v===null)return;const x=toX(i),y=toY(v);if(!em){ctx.moveTo(x,y);em=true;}else ctx.lineTo(x,y);});
+  ctx.stroke();ctx.shadowBlur=0;
+
+  // Current price
+  const cp=cached.price;const cpy=toY(cp);
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=.7;ctx.setLineDash([2,2]);
+  ctx.beginPath();ctx.moveTo(PAD.l,cpy);ctx.lineTo(W-PAD.r,cpy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#e8f0fe';ctx.font='bold 9px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText('$'+fmtP(cp),W-PAD.r+3,cpy+3);
+
+  // AO label
+  if(cached.ao){
+    const col=cached.ao.bullish?'#00e676':'#ff1744';
+    ctx.fillStyle=col+'22';ctx.fillRect(PAD.l,PAD.t-1,180,16);
+    ctx.fillStyle=col;ctx.font='bold 9px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillText(`AO(1H): ${cached.ao.bullish?'▲ صعودی':'▼ نزولی'} ${cached.ao.value.toFixed(4)}`,PAD.l+6,PAD.t+11);
+  }
+
+  // Timestamps
+  ctx.fillStyle='#4a607a';ctx.font='7px JetBrains Mono';ctx.textAlign='center';
+  [0,Math.floor(N*.3),Math.floor(N*.6),N-1].forEach(i=>{
+    if(i>=d.length)return;const dt=new Date(d[i].ts);
+    ctx.fillText(`${dt.getHours()}:${String(dt.getMinutes()).padStart(2,'0')}`,toX(i),H-PAD.b+14);
+  });
+}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target===document.getElementById('modalBg'))closeModal();});
+window.addEventListener('resize',()=>{if(chartSym)drawChart();});
+
+// ══ SIMPLE CALCULATOR ══════════════════════════
+let scExpr='';let scNewNum=true;
+function initCalc(){
+  const keys=['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','⌫','+',' ','='];
+  const full=['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='];
+  const btns=document.getElementById('sc-btns');
+  full.forEach(k=>{
+    const b=document.createElement('button');
+    b.className='ck'+(('÷×−+').includes(k)?' op':k==='='?' eq':k==='C'?' clear':'');
+    b.textContent=k;b.onclick=()=>handleCalc(k);
+    btns.appendChild(b);
+  });
+}
+function handleCalc(k){
+  const disp=document.getElementById('sc-disp');
+  if(k==='C'){scExpr='';disp.value='0';return;}
+  if(k==='⌫'){scExpr=scExpr.slice(0,-1)||'0';disp.value=scExpr||'0';return;}
+  if(k==='='){
+    try{
+      const expr=scExpr.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
+      const result=Function('"use strict";return ('+expr+')')();
+      disp.value=parseFloat(result.toFixed(10)).toString();
+      scExpr=disp.value;
+    }catch{disp.value='خطا';scExpr='';}
+    return;
+  }
+  if(k==='±'){try{scExpr=String(-parseFloat(scExpr));}catch{}disp.value=scExpr;return;}
+  if(k==='%'){try{scExpr=String(parseFloat(scExpr)/100);}catch{}disp.value=scExpr;return;}
+  if(k===' ')return;
+  scExpr+=k==='÷'?'/':k==='×'?'*':k==='−'?'-':k;
+  disp.value=scExpr;
+}
+
+// ══ COMPOUND CALCULATOR ════════════════════════
+function calcCompound(){
+  const cap=parseFloat(document.getElementById('ci-cap').value)||1000;
+  const pct=parseFloat(document.getElementById('ci-pct').value)||2;
+  const n=parseInt(document.getElementById('ci-n').value)||10;
+  const rows=[];let bal=cap;
+  for(let i=1;i<=n;i++){
+    const profit=bal*pct/100;
+    const after=bal+profit;
+    rows.push({n:i,before:bal,profit,after});
+    bal=after;
+  }
+  document.getElementById('ci-final').textContent='$'+bal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('ci-profit').textContent='$'+(bal-cap).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('ci-growth').textContent='+'+((bal-cap)/cap*100).toFixed(2)+'%';
+  document.getElementById('ci-tbody').innerHTML=rows.map(r=>`
+    <tr><td>${r.n}</td>
+    <td style="color:var(--text2)">$${r.before.toFixed(2)}</td>
+    <td style="color:var(--green)">+$${r.profit.toFixed(2)}</td>
+    <td style="color:var(--accent);font-weight:700">$${r.after.toFixed(2)}</td></tr>`).join('');
+  document.getElementById('ci-summary').style.display='block';
+}
+
+// ══ JOURNAL ════════════════════════════════════
+function saveTrade(){
+  const sym=document.getElementById('je-sym').value.trim().toUpperCase();
+  if(!sym){showToast('نماد وارد کنید','warn');return;}
+  const trade={
+    id:Date.now(),sym,date:document.getElementById('je-date').value,
+    time:document.getElementById('je-time').value,
+    dir:document.getElementById('je-dir').value,
+    entry:parseFloat(document.getElementById('je-entry').value)||0,
+    sl:parseFloat(document.getElementById('je-sl').value)||0,
+    tp:parseFloat(document.getElementById('je-tp').value)||0,
+    cap:parseFloat(document.getElementById('je-cap').value)||0,
+    pnl:parseFloat(document.getElementById('je-pnl').value)||0,
+    result:document.getElementById('je-result').value,
+    note:document.getElementById('je-note').value
   };
   trades.unshift(trade);
-  localStorage.setItem('trades', JSON.stringify(trades));
-  renderJournal();
-  e.target.reset();
-  alert('معامله با موفقیت ثبت شد');
+  if(trades.length>500)trades=trades.slice(0,500);
+  localStorage.setItem('ao-trades',JSON.stringify(trades));
+  // Reset fields
+  ['je-sym','je-entry','je-sl','je-tp','je-cap','je-pnl','je-note'].forEach(id=>document.getElementById(id).value='');
+  showToast(t('saved'),'success');
+  renderJournalStats();renderJournalTable();
 }
+function deleteTrade(id){
+  trades=trades.filter(t=>t.id!==id);
+  localStorage.setItem('ao-trades',JSON.stringify(trades));
+  renderJournalStats();renderJournalTable();
+}
+function renderJournalStats(){
+  const total=trades.length;
+  const wins=trades.filter(t=>t.result==='win').length;
+  const losses=trades.filter(t=>t.result==='loss').length;
+  const rfs=trades.filter(t=>t.result==='rf').length;
+  const wr=total?Math.round(wins/total*100):0;
+  const pnl=trades.reduce((a,t)=>a+(t.pnl||0),0);
+  document.getElementById('js-total').textContent=total;
+  document.getElementById('js-wr').textContent=wr+'%';
+  document.getElementById('js-wins').textContent=wins;
+  document.getElementById('js-losses').textContent=losses;
+  document.getElementById('js-rf').textContent=rfs;
+  const pnlEl=document.getElementById('js-pnl');
+  pnlEl.textContent=(pnl>=0?'+':'')+'$'+pnl.toFixed(2);
+  pnlEl.style.color=pnl>=0?'var(--green)':'var(--red)';
 
-function renderJournal() {
-  // Statistics
-  const wins = trades.filter(t => t.outcome === 'Win').length;
-  const total = trades.length;
-  const winrate = total ? (wins / total * 100).toFixed(1) : 0;
-
-  let statsHTML = `
-    <div class="grid grid-cols-4 gap-4 text-center">
-      <div class="bg-zinc-800 p-6 rounded-2xl"><div class="text-emerald-400 text-3xl font-bold">${winrate}%</div><div>Win Rate</div></div>
-      <div class="bg-zinc-800 p-6 rounded-2xl"><div class="text-2xl font-bold">${total}</div><div>کل معاملات</div></div>
-      <div class="bg-zinc-800 p-6 rounded-2xl"><div class="text-emerald-400 text-2xl font-bold">${wins}</div><div>Win</div></div>
-      <div class="bg-zinc-800 p-6 rounded-2xl"><div class="text-red-400 text-2xl font-bold">${total - wins}</div><div>Loss + RF</div></div>
-    </div>`;
-
-  document.getElementById('journalStats').innerHTML = statsHTML;
-
-  // Table
-  let tableHTML = `<table class="w-full"><thead class="bg-black"><tr><th class="p-4">نماد</th><th>جهت</th><th>نتیجه</th><th>سود/ضرر</th><th>یادداشت</th></tr></thead><tbody>`;
-  trades.forEach(t => {
-    tableHTML += `<tr class="border-t border-zinc-700"><td class="p-4">${t.symbol}</td><td>${t.direction}</td><td class="${t.outcome==='Win'?'text-emerald-400':'text-red-400'}">${t.outcome}</td><td>${t.resultAmount}</td><td class="text-xs text-zinc-400">${t.notes.substring(0,25)}...</td></tr>`;
+  // Per symbol
+  const symMap={};
+  trades.forEach(t=>{
+    if(!symMap[t.sym])symMap[t.sym]={total:0,win:0,loss:0,rf:0,pnl:0};
+    symMap[t.sym].total++;
+    symMap[t.sym][t.result]++;
+    symMap[t.sym].pnl+=t.pnl||0;
   });
-  tableHTML += `</tbody></table>`;
-  document.getElementById('journalTable').innerHTML = tableHTML;
+  document.getElementById('js-per-sym').innerHTML=Object.entries(symMap).map(([sym,v])=>
+    `<div style="background:var(--s3);border-radius:7px;padding:8px 11px;margin-bottom:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);">${sym}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:9px;color:var(--text3);">کل: <b style="color:var(--text)">${v.total}</b></span>
+        <span style="font-size:9px;color:var(--green);">Win: ${v.win}</span>
+        <span style="font-size:9px;color:var(--red);">Loss: ${v.loss}</span>
+        <span style="font-size:9px;color:var(--text3);">RF: ${v.rf}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${v.pnl>=0?'var(--green)':'var(--red)'};">${v.pnl>=0?'+':''}$${v.pnl.toFixed(2)}</span>
+      </div>
+    </div>`
+  ).join('')||'<div style="color:var(--text3);font-size:10px;text-align:center;padding:10px;">هنوز معامله‌ای ثبت نشده</div>';
+}
+function renderJournalTable(){
+  const tbody=document.getElementById('journal-tbody');
+  if(!trades.length){tbody.innerHTML=`<tr><td colspan="10" class="ldc" style="text-align:center;padding:30px;">معامله‌ای ثبت نشده</td></tr>`;return;}
+  tbody.innerHTML=trades.map(t=>{
+    const rcls={win:'j-res-win',loss:'j-res-loss',rf:'j-res-rf'}[t.result]||'j-res-rf';
+    const rlbl={win:'✅ Win',loss:'❌ Loss',rf:'⚪ RF'}[t.result]||t.result;
+    const dirCls=t.dir==='long'?'dir-long':'dir-short';
+    const dirLbl=t.dir==='long'?'LONG ▲':'SHORT ▼';
+    return`<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);">${t.sym}</td>
+      <td style="color:var(--text3);font-size:9px;">${t.date}</td>
+      <td><span class="${dirCls}" style="font-size:8px;">${dirLbl}</span></td>
+      <td>${t.entry?'$'+t.entry:'-'}</td>
+      <td style="color:var(--red);">${t.sl?'$'+t.sl:'-'}</td>
+      <td style="color:var(--green);">${t.tp?'$'+t.tp:'-'}</td>
+      <td>${t.cap?'$'+t.cap:'-'}</td>
+      <td style="color:${t.pnl>=0?'var(--green)':'var(--red)'};">${t.pnl>=0?'+':''}$${(t.pnl||0).toFixed(2)}</td>
+      <td><span class="${rcls}">${rlbl}</span></td>
+      <td><button onclick="deleteTrade(${t.id})" style="background:none;border:1px solid rgba(255,23,68,.3);border-radius:4px;color:var(--red);cursor:pointer;font-size:10px;padding:2px 7px;">حذف</button></td>
+    </tr>`;
+  }).join('');
 }
 
-// ================== Compound Calculator ==================
-function calculateCompound() {
-  let capital = parseFloat(document.getElementById('initial').value);
-  const pct = parseFloat(document.getElementById('profitPct').value) / 100;
-  const count = parseInt(document.getElementById('trades').value);
-  let result = `<div class="max-h-80 overflow-auto">`;
-
-  for (let i = 1; i <= count; i++) {
-    const profit = capital * pct;
-    capital += profit;
-    result += `<div class="flex justify-between py-2 border-b border-zinc-700"><span>معامله ${i}</span><span class="text-emerald-400">سرمایه: $${capital.toFixed(2)}</span></div>`;
-  }
-  result += `</div><div class="mt-6 text-xl font-bold text-purple-400">سرمایه نهایی: $${capital.toFixed(2)}</div>`;
-  document.getElementById('compoundResult').innerHTML = result;
+// ══ COUNTDOWN ════════════════════════════════
+function startCD(){
+  cdVal=30;clearInterval(cdTimer);
+  cdTimer=setInterval(()=>{
+    cdVal--;
+    document.getElementById('cd').textContent=`⏱ ${cdVal}s`;
+    if(cdVal<=0){cdVal=30;refreshAll();}
+  },1000);
 }
 
-// ================== Live Simulation (every 30 seconds) ==================
-function liveUpdate() {
-  let count = 30;
-  const interval = setInterval(() => {
-    count--;
-    document.getElementById('countdown').textContent = count + 's';
-    if (count <= 0) {
-      // Simulate price & data change
-      symbols.forEach(s => {
-        s.price = (s.price * (1 + (Math.random() * 0.003 - 0.0015))).toFixed(s.symbol.includes('USD') ? 1 : 2) * 1;
-        s.lastUpdate = 'چند ثانیه قبل';
-      });
-      renderDashboard();
-      count = 30;
-      if (alertsEnabled) playAlert();
-    }
-  }, 1000);
-}
-
-// ================== Init ==================
-function renderAll() {
-  renderDashboard();
-  renderJournal();
-}
-
-window.onload = () => {
-  updateClocks();
-  setInterval(updateClocks, 30000);
-  renderAll();
-  liveUpdate();
-  showPage(1);
-
-  // Request notification permission
-  if (Notification.permission === "default") Notification.requestPermission();
-};
+// ══ INIT ═════════════════════════════════════
+document.getElementById('wl-inp').addEventListener('keydown',e=>{if(e.key==='Enter')addWL();});
+document.getElementById('je-date').valueAsDate=new Date();
+document.getElementById('je-time').value=new Date().toTimeString().slice(0,5);
+initCalc();
+renderWLTags();
+renderScanner();
+renderJournalStats();
+renderJournalTable();
+applyLang();
+setInterval(updateClocks,1000);
+updateClocks();
+refreshAll();
+startCD();
 </script>
 </body>
 </html>
